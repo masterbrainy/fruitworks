@@ -2,8 +2,13 @@ import { Play, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 const HIGH_SCORE_KEY = "fruitCutterHighScore";
+const KNIFE_IMPACT_MS = 980;
+const KNIFE_RESPAWN_MS = 260;
 
 type GameState = "idle" | "playing" | "gameOver";
+type KnifeState = "ready" | "dropping" | "hidden" | "stuck";
+type KnifeMode = "normal" | "wide" | "skinny";
+type EffectPolarity = "positive" | "negative";
 
 type FruitType =
   | "apple"
@@ -13,7 +18,43 @@ type FruitType =
   | "watermelon"
   | "rambutan"
   | "lemon"
-  | "lime";
+  | "lime"
+  | "celery"
+  | "starfruit";
+
+type ActiveEffects = {
+  frozenFruitId: number | null;
+  freezeNextFruit: boolean;
+  freezeTargetFruitId: number | null;
+  knifeMode: KnifeMode;
+  knifeUntil: number;
+  scoreMultiplier: 1 | 2;
+  scoreUntil: number;
+  tinyFruitUntil: number;
+};
+
+type EffectPopup = {
+  id: number;
+  message: string;
+  polarity: EffectPolarity;
+};
+
+type SpecialEffect = {
+  apply: (now: number, current: ActiveEffects) => ActiveEffects;
+  message: string;
+  polarity: EffectPolarity;
+};
+
+const EMPTY_EFFECTS: ActiveEffects = {
+  frozenFruitId: null,
+  freezeNextFruit: false,
+  freezeTargetFruitId: null,
+  knifeMode: "normal",
+  knifeUntil: 0,
+  scoreMultiplier: 1,
+  scoreUntil: 0,
+  tinyFruitUntil: 0,
+};
 
 type Fruit = {
   id: number;
@@ -28,6 +69,7 @@ type Fruit = {
 
 type FloatingPoint = {
   id: number;
+  value: number;
   x: number;
   y: number;
 };
@@ -41,6 +83,7 @@ const fruitTypes: FruitType[] = [
   "rambutan",
   "lemon",
   "lime",
+  "celery",
 ];
 
 const fruitSettings: Record<FruitType, { minSize: number; maxSize: number; hitScale: number; speedBias: number }> = {
@@ -52,18 +95,65 @@ const fruitSettings: Record<FruitType, { minSize: number; maxSize: number; hitSc
   rambutan: { minSize: 58, maxSize: 70, hitScale: 0.62, speedBias: 4 },
   lemon: { minSize: 58, maxSize: 72, hitScale: 0.66, speedBias: 2 },
   lime: { minSize: 52, maxSize: 64, hitScale: 0.58, speedBias: 5 },
+  celery: { minSize: 92, maxSize: 110, hitScale: 0.2, speedBias: 6 },
+  starfruit: { minSize: 72, maxSize: 84, hitScale: 0.78, speedBias: -2 },
 };
+
+const specialEffects: SpecialEffect[] = [
+  {
+    apply: (now, current) => ({ ...current, scoreMultiplier: 2, scoreUntil: now + 15000 }),
+    message: "x2 score for 15 seconds",
+    polarity: "positive",
+  },
+  {
+    apply: (now, current) => ({ ...current, scoreMultiplier: 2, scoreUntil: now + 30000 }),
+    message: "x2 score for 30 seconds",
+    polarity: "positive",
+  },
+  {
+    apply: (now, current) => ({ ...current, knifeMode: "wide", knifeUntil: now + 15000 }),
+    message: "wide knife for 15 seconds",
+    polarity: "positive",
+  },
+  {
+    apply: (_now, current) => ({ ...current, freezeNextFruit: true }),
+    message: "freeze one fruit until cut",
+    polarity: "positive",
+  },
+  {
+    apply: (now, current) => ({ ...current, knifeMode: "skinny", knifeUntil: now + 15000 }),
+    message: "skinny knife for 15 seconds",
+    polarity: "negative",
+  },
+  {
+    apply: (now, current) => ({ ...current, tinyFruitUntil: now + 15000 }),
+    message: "tiny fruit for 15 seconds",
+    polarity: "negative",
+  },
+  {
+    apply: (now, current) => ({ ...current, tinyFruitUntil: now + 30000 }),
+    message: "tiny fruit for 30 seconds",
+    polarity: "negative",
+  },
+];
 
 const randomBetween = (min: number, max: number) => Math.random() * (max - min) + min;
 
 const pickFruitType = () => fruitTypes[Math.floor(Math.random() * fruitTypes.length)];
 
-const createFruit = (beltHeight: number, elapsedSeconds: number): Fruit => {
-  const type = pickFruitType();
+const createFruit = (
+  beltHeight: number,
+  elapsedSeconds: number,
+  fruitNumber: number,
+  activeEffects: ActiveEffects,
+  now: number,
+): Fruit => {
+  const type = fruitNumber === 3 || (fruitNumber > 3 && Math.random() < 0.1) ? "starfruit" : pickFruitType();
   const settings = fruitSettings[type];
-  const size = randomBetween(settings.minSize, settings.maxSize);
-  const laneCenter = beltHeight * 0.58;
-  const speed = Math.min(188, 76 + elapsedSeconds * 2.9 + settings.speedBias + randomBetween(-4, 9));
+  const tinyFruitScale = activeEffects.tinyFruitUntil > now && type !== "starfruit" ? 0.62 : 1;
+  const size = randomBetween(settings.minSize, settings.maxSize) * tinyFruitScale;
+  const laneCenter = beltHeight * 0.49;
+  const speed = Math.min(283.4, 135.2 + elapsedSeconds * 2.9 + settings.speedBias + randomBetween(-4, 9));
 
   return {
     id: Date.now() + Math.floor(Math.random() * 10000),
@@ -87,11 +177,14 @@ const loadHighScore = () => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
+const formatRemaining = (until: number, now: number) => `${Math.max(0, Math.ceil((until - now) / 1000))}s`;
+
 function FruitSprite({ fruit }: { fruit: Fruit }) {
   const cutPercent = Math.min(78, Math.max(22, fruit.cutPercent));
 
   return (
     <div
+      data-fruit-id={fruit.id}
       className={`fruit-sprite fruit-${fruit.type}${fruit.cut ? " is-cut" : ""}`}
       style={{
         "--fruit-size": `${fruit.size}px`,
@@ -150,11 +243,14 @@ function GameOverModal({
 
 export function FruitCutterGame() {
   const beltRef = useRef<HTMLDivElement | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
   const timerRef = useRef<number | null>(null);
   const lastFrameRef = useRef(0);
   const startTimeRef = useRef(0);
   const fruitIdRef = useRef(1);
+  const fruitNumberRef = useRef(0);
   const fruitsRef = useRef<Fruit[]>([]);
+  const activeEffectsRef = useRef<ActiveEffects>(EMPTY_EFFECTS);
   const scoreRef = useRef(0);
   const gameStateRef = useRef<GameState>("idle");
   const beltSizeRef = useRef({ width: 900, height: 190 });
@@ -167,8 +263,11 @@ export function FruitCutterGame() {
   const [highScore, setHighScore] = useState(loadHighScore);
   const [fruits, setFruits] = useState<Fruit[]>([]);
   const [floatingPoints, setFloatingPoints] = useState<FloatingPoint[]>([]);
+  const [activeEffects, setActiveEffects] = useState<ActiveEffects>(EMPTY_EFFECTS);
+  const [effectNow, setEffectNow] = useState(0);
+  const [effectPopup, setEffectPopup] = useState<EffectPopup | null>(null);
   const [beltSize, setBeltSize] = useState({ width: 900, height: 190 });
-  const [knifeState, setKnifeState] = useState<"ready" | "dropping" | "stuck">("ready");
+  const [knifeState, setKnifeState] = useState<KnifeState>("ready");
 
   useEffect(() => {
     fruitsRef.current = fruits;
@@ -220,16 +319,144 @@ export function FruitCutterGame() {
     return timer;
   }, []);
 
+  const updateEffects = useCallback((updater: (current: ActiveEffects) => ActiveEffects) => {
+    setActiveEffects((currentEffects) => {
+      const nextEffects = updater(currentEffects);
+      activeEffectsRef.current = nextEffects;
+      return nextEffects;
+    });
+  }, []);
+
+  const triggerSpecialEffect = useCallback(
+    (now: number) => {
+      const effect = specialEffects[Math.floor(Math.random() * specialEffects.length)];
+      updateEffects((currentEffects) => effect.apply(now, currentEffects));
+      setEffectNow(now);
+      setEffectPopup({ id: now, message: effect.message, polarity: effect.polarity });
+      setPendingTimer(() => {
+        setEffectPopup((currentPopup) => (currentPopup?.id === now ? null : currentPopup));
+      }, 2600);
+    },
+    [setPendingTimer, updateEffects],
+  );
+
+  const getAudioContext = useCallback(() => {
+    const audioWindow = window as typeof window & {
+      webkitAudioContext?: typeof AudioContext;
+    };
+    const AudioContextConstructor = audioWindow.AudioContext || audioWindow.webkitAudioContext;
+
+    if (!AudioContextConstructor) {
+      return null;
+    }
+
+    if (!audioContextRef.current) {
+      audioContextRef.current = new AudioContextConstructor();
+    }
+
+    if (audioContextRef.current.state === "suspended") {
+      void audioContextRef.current.resume();
+    }
+
+    return audioContextRef.current;
+  }, []);
+
+  const playSliceSound = useCallback(() => {
+    const context = getAudioContext();
+    if (!context) {
+      return;
+    }
+
+    const start = context.currentTime;
+    const noiseBuffer = context.createBuffer(1, Math.floor(context.sampleRate * 0.18), context.sampleRate);
+    const samples = noiseBuffer.getChannelData(0);
+    for (let index = 0; index < samples.length; index += 1) {
+      const fade = 1 - index / samples.length;
+      samples[index] = (Math.random() * 2 - 1) * fade * fade;
+    }
+
+    const noise = context.createBufferSource();
+    const filter = context.createBiquadFilter();
+    const gain = context.createGain();
+    const pop = context.createOscillator();
+    const popGain = context.createGain();
+
+    noise.buffer = noiseBuffer;
+    filter.type = "bandpass";
+    filter.frequency.setValueAtTime(720, start);
+    filter.frequency.exponentialRampToValueAtTime(210, start + 0.16);
+    filter.Q.setValueAtTime(0.7, start);
+    gain.gain.setValueAtTime(0.0001, start);
+    gain.gain.exponentialRampToValueAtTime(0.2, start + 0.018);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.18);
+
+    pop.type = "triangle";
+    pop.frequency.setValueAtTime(190, start);
+    pop.frequency.exponentialRampToValueAtTime(72, start + 0.11);
+    popGain.gain.setValueAtTime(0.0001, start);
+    popGain.gain.exponentialRampToValueAtTime(0.12, start + 0.012);
+    popGain.gain.exponentialRampToValueAtTime(0.0001, start + 0.13);
+
+    noise.connect(filter).connect(gain).connect(context.destination);
+    pop.connect(popGain).connect(context.destination);
+    noise.start(start);
+    noise.stop(start + 0.2);
+    pop.start(start);
+    pop.stop(start + 0.14);
+  }, [getAudioContext]);
+
+  const playFailureSound = useCallback(() => {
+    const context = getAudioContext();
+    if (!context) {
+      return;
+    }
+
+    const start = context.currentTime;
+    const output = context.createGain();
+    output.gain.setValueAtTime(0.0001, start);
+    output.gain.exponentialRampToValueAtTime(0.23, start + 0.02);
+    output.gain.exponentialRampToValueAtTime(0.0001, start + 0.34);
+    output.connect(context.destination);
+
+    [82, 58].forEach((frequency, index) => {
+      const oscillator = context.createOscillator();
+      const gain = context.createGain();
+      const offset = index * 0.055;
+      oscillator.type = "square";
+      oscillator.frequency.setValueAtTime(frequency, start + offset);
+      oscillator.frequency.exponentialRampToValueAtTime(frequency * 0.72, start + offset + 0.16);
+      gain.gain.setValueAtTime(0.0001, start + offset);
+      gain.gain.exponentialRampToValueAtTime(0.16, start + offset + 0.012);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start + offset + 0.18);
+      oscillator.connect(gain).connect(output);
+      oscillator.start(start + offset);
+      oscillator.stop(start + offset + 0.2);
+    });
+  }, [getAudioContext]);
+
   const makeNextFruit = useCallback((startX?: number) => {
     if (beltRef.current) {
       beltSizeRef.current = { width: beltRef.current.clientWidth, height: beltRef.current.clientHeight };
     }
 
-    const elapsedSeconds = (performance.now() - startTimeRef.current) / 1000;
-    const nextFruit = createFruit(beltSizeRef.current.height, elapsedSeconds);
+    const now = performance.now();
+    const elapsedSeconds = (now - startTimeRef.current) / 1000;
+    fruitNumberRef.current += 1;
+    const nextFruit = createFruit(beltSizeRef.current.height, elapsedSeconds, fruitNumberRef.current, activeEffectsRef.current, now);
     nextFruit.id = fruitIdRef.current;
     nextFruit.x = startX ?? -nextFruit.size - 18;
     fruitIdRef.current += 1;
+
+    if (activeEffectsRef.current.freezeNextFruit) {
+      const nextEffects = {
+        ...activeEffectsRef.current,
+        freezeNextFruit: false,
+        freezeTargetFruitId: nextFruit.id,
+      };
+      activeEffectsRef.current = nextEffects;
+      setActiveEffects(nextEffects);
+    }
+
     return nextFruit;
   }, []);
 
@@ -262,18 +489,42 @@ export function FruitCutterGame() {
     const currentBeltSize = beltSizeRef.current;
 
     lastFrameRef.current = now;
+    setEffectNow(now);
 
     setFruits((currentFruits) => {
+      const currentEffects = activeEffectsRef.current;
+      const freezeTargetX = currentBeltSize.width * 0.5;
+      let activatedFreezeEffects: ActiveEffects | null = null;
       const nextFruits = currentFruits
-        .map((fruit) =>
-          fruit.cut
-            ? fruit
-            : {
-                ...fruit,
-                x: fruit.x + fruit.speed * deltaSeconds,
-              },
-        )
+        .map((fruit) => {
+          if (fruit.cut || currentEffects.frozenFruitId === fruit.id) {
+            return fruit;
+          }
+
+          let nextX = fruit.x + fruit.speed * deltaSeconds;
+          if (
+            currentEffects.freezeTargetFruitId === fruit.id &&
+            nextX + fruit.size / 2 >= freezeTargetX
+          ) {
+            nextX = freezeTargetX - fruit.size / 2;
+            activatedFreezeEffects = {
+              ...currentEffects,
+              frozenFruitId: fruit.id,
+              freezeTargetFruitId: null,
+            };
+          }
+
+          return {
+            ...fruit,
+            x: nextX,
+          };
+        })
         .filter((fruit) => fruit.cut || fruit.x < currentBeltSize.width + fruit.size + 8);
+
+      if (activatedFreezeEffects) {
+        activeEffectsRef.current = activatedFreezeEffects;
+        window.setTimeout(() => setActiveEffects(activatedFreezeEffects as ActiveEffects), 0);
+      }
 
       const missedFruit = nextFruits.some(
         (fruit) => !fruit.cut && fruit.x > currentBeltSize.width + fruit.size * 0.45,
@@ -281,9 +532,11 @@ export function FruitCutterGame() {
 
       if (missedFruit) {
         window.setTimeout(endGame, 0);
+        fruitsRef.current = nextFruits;
         return nextFruits;
       }
 
+      fruitsRef.current = nextFruits;
       return nextFruits;
     });
   }, [endGame]);
@@ -299,26 +552,27 @@ export function FruitCutterGame() {
       beltSizeRef.current = { width: beltRef.current.clientWidth, height: beltRef.current.clientHeight };
     }
 
-    const starterFruit = createFruit(beltSizeRef.current.height, 0);
-    starterFruit.id = fruitIdRef.current;
-    starterFruit.x = -starterFruit.size - 18;
-    fruitIdRef.current += 1;
-
+    fruitNumberRef.current = 0;
+    activeEffectsRef.current = EMPTY_EFFECTS;
     setScore(0);
     setFloatingPoints([]);
+    setActiveEffects(EMPTY_EFFECTS);
+    setEffectNow(performance.now());
+    setEffectPopup(null);
     setKnifeState("ready");
     knifeDroppingRef.current = false;
     knifeMissRef.current = false;
+    startTimeRef.current = performance.now();
+    lastFrameRef.current = performance.now();
+    const starterFruit = makeNextFruit();
     setFruits([starterFruit]);
     setGameState("playing");
     gameStateRef.current = "playing";
     scoreRef.current = 0;
     fruitsRef.current = [starterFruit];
-    startTimeRef.current = performance.now();
-    lastFrameRef.current = performance.now();
     tickGame();
     timerRef.current = window.setInterval(tickGame, 16);
-  }, [clearPendingTimers, tickGame]);
+  }, [clearPendingTimers, makeNextFruit, tickGame]);
 
   const cutFruit = useCallback((fruit: Fruit, cutX: number) => {
     if (gameStateRef.current !== "playing" || fruit.cut) {
@@ -327,8 +581,23 @@ export function FruitCutterGame() {
 
     const cutPercent = Math.min(78, Math.max(22, (cutX / fruit.size) * 100));
 
-    setScore((currentScore) => currentScore + 1);
-    setFloatingPoints((points) => [...points, { id: fruit.id, x: fruit.x + cutX, y: fruit.y }]);
+    const now = performance.now();
+    const scoreDelta = activeEffectsRef.current.scoreUntil > now && activeEffectsRef.current.scoreMultiplier === 2 ? 2 : 1;
+    if (
+      activeEffectsRef.current.frozenFruitId === fruit.id ||
+      activeEffectsRef.current.freezeTargetFruitId === fruit.id
+    ) {
+      const nextEffects = {
+        ...activeEffectsRef.current,
+        frozenFruitId: null,
+        freezeTargetFruitId: null,
+      };
+      activeEffectsRef.current = nextEffects;
+      setActiveEffects(nextEffects);
+    }
+
+    setScore((currentScore) => currentScore + scoreDelta);
+    setFloatingPoints((points) => [...points, { id: fruit.id, x: fruit.x + cutX, y: fruit.y, value: scoreDelta }]);
     setPendingTimer(() => {
       setFloatingPoints((points) => points.filter((point) => point.id !== fruit.id));
     }, 760);
@@ -341,7 +610,7 @@ export function FruitCutterGame() {
 
     setPendingTimer(() => {
       setFruits((currentFruits) => currentFruits.filter((currentFruit) => currentFruit.id !== fruit.id));
-    }, 520);
+    }, 560);
 
     setPendingTimer(() => {
       if (gameStateRef.current !== "playing") {
@@ -351,7 +620,11 @@ export function FruitCutterGame() {
       const nextFruit = makeNextFruit();
       setFruits([nextFruit]);
     }, 380);
-  }, [makeNextFruit, setPendingTimer]);
+
+    if (fruit.type === "starfruit") {
+      triggerSpecialEffect(now);
+    }
+  }, [makeNextFruit, setPendingTimer, triggerSpecialEffect]);
 
   const dropKnife = useCallback(() => {
     if (gameStateRef.current !== "playing" || knifeDroppingRef.current) {
@@ -367,45 +640,62 @@ export function FruitCutterGame() {
     setKnifeState("dropping");
 
     setPendingTimer(() => {
-      const knifeX = beltSizeRef.current.width / 2;
+      const bladeRect = document.querySelector(".knife-blade")?.getBoundingClientRect();
+      const knifeX = bladeRect ? bladeRect.left + bladeRect.width / 2 : window.innerWidth / 2;
+      const bladeAllowance = bladeRect ? bladeRect.width * 0.18 : 6;
       const hittableFruit = fruitsRef.current
         .filter((fruit) => !fruit.cut)
         .map((fruit) => {
-          const fruitCenter = fruit.x + fruit.size / 2;
-          const cutX = knifeX - fruit.x;
+          const fruitElement = document.querySelector(`[data-fruit-id="${fruit.id}"]`);
+          const fruitRect = fruitElement?.getBoundingClientRect();
+          const fruitCenter = fruitRect ? fruitRect.left + fruitRect.width / 2 : fruit.x + fruit.size / 2;
+          const visualWidth = fruitRect?.width ?? fruit.size;
+          const visualLeft = fruitRect?.left ?? fruit.x;
+          const visualRight = visualLeft + visualWidth;
+          const cutX = ((knifeX - visualLeft) / visualWidth) * fruit.size;
           const hitHalfWidth = fruit.size * fruitSettings[fruit.type].hitScale * 0.5;
+          const hitAllowance = fruit.type === "celery" ? 1 : bladeAllowance + 4;
+          const visualHitHalfWidth = visualWidth * fruitSettings[fruit.type].hitScale * 0.5 + hitAllowance;
           return {
             fruit,
             cutX,
             distance: Math.abs(fruitCenter - knifeX),
-            hitHalfWidth,
+            hitHalfWidth: visualHitHalfWidth || hitHalfWidth,
+            edgeAllowance: hitAllowance,
+            visualLeft,
+            visualRight,
           };
         })
-        .filter(({ cutX, distance, fruit, hitHalfWidth }) => cutX >= 0 && cutX <= fruit.size && distance <= hitHalfWidth)
+        .filter(
+          ({ cutX, distance, edgeAllowance, fruit, hitHalfWidth, visualLeft, visualRight }) =>
+            cutX >= 0 &&
+            cutX <= fruit.size &&
+            distance <= hitHalfWidth &&
+            knifeX >= visualLeft - edgeAllowance &&
+            knifeX <= visualRight + edgeAllowance,
+        )
         .sort((first, second) => first.distance - second.distance)[0];
 
       if (hittableFruit) {
+        playSliceSound();
         cutFruit(hittableFruit.fruit, hittableFruit.cutX);
+        setKnifeState("hidden");
+        setPendingTimer(() => {
+          knifeDroppingRef.current = false;
+          setKnifeState("ready");
+        }, KNIFE_RESPAWN_MS);
         return;
       }
 
+      playFailureSound();
       setKnifeState("stuck");
       knifeMissRef.current = true;
       setPendingTimer(() => {
         knifeDroppingRef.current = false;
         endGame();
       }, 650);
-    }, 190);
-
-    setPendingTimer(() => {
-      if (gameStateRef.current !== "playing" || knifeMissRef.current) {
-        return;
-      }
-
-      knifeDroppingRef.current = false;
-      setKnifeState("ready");
-    }, 430);
-  }, [cutFruit, endGame, setPendingTimer]);
+    }, KNIFE_IMPACT_MS);
+  }, [cutFruit, endGame, playFailureSound, playSliceSound, setPendingTimer]);
 
   useEffect(
     () => () => {
@@ -417,9 +707,57 @@ export function FruitCutterGame() {
     [clearPendingTimers],
   );
 
+  const isDoubleScoreActive = activeEffects.scoreUntil > effectNow && activeEffects.scoreMultiplier === 2;
+  const isFreezeActive =
+    activeEffects.freezeNextFruit || activeEffects.freezeTargetFruitId !== null || activeEffects.frozenFruitId !== null;
+  const isTinyFruitActive = activeEffects.tinyFruitUntil > effectNow;
+  const currentKnifeMode = activeEffects.knifeUntil > effectNow ? activeEffects.knifeMode : "normal";
+  const activeEffectBadges = [
+    isDoubleScoreActive ? { label: "x2 Score", time: formatRemaining(activeEffects.scoreUntil, effectNow) } : null,
+    currentKnifeMode !== "normal"
+      ? { label: currentKnifeMode === "wide" ? "Wide Knife" : "Skinny Knife", time: formatRemaining(activeEffects.knifeUntil, effectNow) }
+      : null,
+    isFreezeActive
+      ? {
+          label: "Time Freeze",
+          time: activeEffects.frozenFruitId !== null ? "until cut" : "arming",
+        }
+      : null,
+    isTinyFruitActive ? { label: "Tiny Fruit", time: formatRemaining(activeEffects.tinyFruitUntil, effectNow) } : null,
+  ].filter(Boolean) as Array<{ label: string; time: string }>;
+
   return (
     <main className="app-shell">
-      <section className="game-frame" aria-label="Conveyor Fruit Cutter Game">
+      <section
+        className={`game-frame${isFreezeActive ? " is-frozen" : ""}${isDoubleScoreActive ? " has-double-score" : ""}`}
+        aria-label="Conveyor Fruit Cutter Game"
+      >
+        {isDoubleScoreActive && (
+          <div className="spark-field" aria-hidden="true">
+            {Array.from({ length: 14 }, (_, index) => (
+              <span key={index} />
+            ))}
+          </div>
+        )}
+
+        {effectPopup && (
+          <div className={`special-popup is-${effectPopup.polarity}`} aria-live="polite">
+            <strong>Special Star Effect:</strong>
+            <span>{effectPopup.message}</span>
+          </div>
+        )}
+
+        {activeEffectBadges.length > 0 && (
+          <div className="effect-status-panel" aria-live="polite">
+            {activeEffectBadges.map((badge) => (
+              <div className="effect-badge" key={badge.label}>
+                <span>{badge.label}</span>
+                <strong>{badge.time}</strong>
+              </div>
+            ))}
+          </div>
+        )}
+
         <header className="scorebar">
           <div className="brand-block">
             <span className="brand-mark" aria-hidden="true">
@@ -462,7 +800,7 @@ export function FruitCutterGame() {
           role="button"
           tabIndex={gameState === "playing" ? 0 : -1}
         >
-          <div className={`knife-rig is-${knifeState}`} aria-hidden="true">
+          <div className={`knife-rig is-${knifeState} knife-${currentKnifeMode}`} aria-hidden="true">
             <span className="knife-handle" />
             <span className="knife-blade" />
             <span className="knife-belt-slit" />
@@ -489,7 +827,7 @@ export function FruitCutterGame() {
                   key={point.id}
                   style={{ left: `${point.x}px`, top: `${point.y}px` }}
                 >
-                  +1
+                  +{point.value}
                 </span>
               ))}
             </div>

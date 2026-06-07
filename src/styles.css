@@ -51,6 +51,127 @@ button {
   box-shadow: 0 24px 48px rgba(42, 54, 74, 0.22);
 }
 
+.spark-field {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.spark-field::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(254, 240, 138, 0.3), transparent 34%),
+    linear-gradient(180deg, rgba(250, 204, 21, 0.16), rgba(255, 255, 255, 0) 58%);
+  animation: double-score-glow 1.8s ease-in-out infinite;
+}
+
+.spark-field span {
+  width: 12px;
+  height: 12px;
+  position: absolute;
+  border-radius: 50%;
+  background: #facc15;
+  box-shadow:
+    0 0 16px rgba(250, 204, 21, 0.95),
+    0 0 34px rgba(251, 191, 36, 0.48);
+  opacity: 0;
+  animation: soft-spark 1.85s ease-in-out infinite;
+}
+
+.spark-field span:nth-child(3n) {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  transform: rotate(45deg);
+}
+
+.spark-field span:nth-child(4n) {
+  width: 8px;
+  height: 24px;
+  border-radius: 999px;
+}
+
+.spark-field span:nth-child(1) { left: 8%; top: 30%; }
+.spark-field span:nth-child(2) { left: 18%; top: 70%; animation-delay: 0.4s; }
+.spark-field span:nth-child(3) { left: 31%; top: 22%; animation-delay: 1.1s; }
+.spark-field span:nth-child(4) { left: 43%; top: 76%; animation-delay: 0.8s; }
+.spark-field span:nth-child(5) { left: 55%; top: 33%; animation-delay: 1.6s; }
+.spark-field span:nth-child(6) { left: 66%; top: 68%; animation-delay: 0.2s; }
+.spark-field span:nth-child(7) { left: 78%; top: 26%; animation-delay: 1.4s; }
+.spark-field span:nth-child(8) { left: 89%; top: 61%; animation-delay: 0.7s; }
+.spark-field span:nth-child(9) { left: 25%; top: 48%; animation-delay: 1.9s; }
+.spark-field span:nth-child(10) { left: 72%; top: 45%; animation-delay: 1.2s; }
+.spark-field span:nth-child(11) { left: 12%; top: 52%; animation-delay: 1.7s; }
+.spark-field span:nth-child(12) { left: 49%; top: 18%; animation-delay: 0.5s; }
+.spark-field span:nth-child(13) { left: 61%; top: 82%; animation-delay: 2.1s; }
+.spark-field span:nth-child(14) { left: 84%; top: 38%; animation-delay: 1s; }
+
+.special-popup {
+  width: min(360px, calc(100% - 34px));
+  position: absolute;
+  z-index: 30;
+  top: 108px;
+  left: 50%;
+  display: grid;
+  gap: 2px;
+  padding: 12px 16px;
+  border: 3px solid currentColor;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.94);
+  color: #15803d;
+  font-weight: 900;
+  text-align: center;
+  transform: translateX(-50%);
+  box-shadow: 0 10px 22px rgba(31, 41, 55, 0.2);
+  animation: special-popup-fade 2.6s ease-out forwards;
+}
+
+.special-popup.is-negative {
+  color: #b91c1c;
+}
+
+.special-popup span {
+  font-size: 1rem;
+}
+
+.effect-status-panel {
+  position: absolute;
+  z-index: 26;
+  right: clamp(14px, 2.5vw, 28px);
+  bottom: clamp(14px, 2.5vw, 26px);
+  display: grid;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.effect-badge {
+  min-width: 146px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 3px solid #1f2937;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #111827;
+  box-shadow: 0 8px 0 rgba(31, 41, 55, 0.1);
+}
+
+.effect-badge span {
+  font-size: 0.88rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.effect-badge strong {
+  font-size: 1.25rem;
+}
+
 .scorebar {
   display: flex;
   align-items: center;
@@ -143,10 +264,33 @@ button {
   padding-top: clamp(20px, 4vh, 42px);
   outline: none;
   touch-action: manipulation;
+  transform: translateY(clamp(-30px, -3.2vh, -18px));
 }
 
 .factory-scene.is-playing {
   cursor: crosshair;
+}
+
+.game-frame.is-frozen .factory-scene::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(219, 242, 255, 0.2), rgba(96, 165, 250, 0.14)),
+    radial-gradient(circle at 50% 42%, rgba(191, 219, 254, 0.2), transparent 45%);
+  pointer-events: none;
+}
+
+.game-frame.is-frozen .belt-stripes {
+  animation-duration: 2.7s;
+}
+
+.game-frame.is-frozen .fruit-sprite:not(.is-cut) {
+  filter:
+    drop-shadow(0 0 8px rgba(147, 197, 253, 0.95))
+    drop-shadow(0 16px 0 rgba(31, 41, 55, 0.18));
 }
 
 .factory-scene:focus-visible {
@@ -155,11 +299,13 @@ button {
 }
 
 .knife-rig {
+  --knife-impact-y: clamp(220px, 32vh, 278px);
+  --knife-bury-y: clamp(228px, 33vh, 286px);
   width: 54px;
   height: 150px;
   position: absolute;
   z-index: 12;
-  top: clamp(3px, 1.6vh, 16px);
+  top: clamp(-150px, -13vh, -110px);
   left: 50%;
   display: grid;
   justify-items: center;
@@ -170,11 +316,41 @@ button {
 }
 
 .knife-rig.is-dropping {
-  animation: knife-drop 430ms cubic-bezier(0.22, 0.84, 0.28, 1) both;
+  animation: knife-drop 980ms linear both;
+}
+
+.knife-rig.is-hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(var(--knife-impact-y));
+}
+
+.knife-rig.knife-wide {
+  width: 86px;
+}
+
+.knife-rig.knife-wide .knife-handle {
+  width: 34px;
+}
+
+.knife-rig.knife-wide .knife-blade {
+  width: 66px;
+  height: 100px;
+}
+
+.knife-rig.knife-skinny {
+  width: 36px;
+}
+
+.knife-rig.knife-skinny .knife-handle {
+  width: 18px;
+}
+
+.knife-rig.knife-skinny .knife-blade {
+  width: 20px;
 }
 
 .knife-rig.is-stuck {
-  animation: knife-stick 780ms cubic-bezier(0.16, 0.92, 0.2, 1) forwards;
+  animation: knife-stick 650ms cubic-bezier(0.16, 0.9, 0.22, 1) forwards;
 }
 
 .knife-rig.is-stuck .knife-blade {
@@ -190,7 +366,7 @@ button {
   height: 15px;
   position: absolute;
   left: 50%;
-  bottom: -1px;
+  bottom: 6px;
   border: 3px solid rgba(31, 41, 55, 0.88);
   border-radius: 50%;
   background: rgba(17, 24, 39, 0.6);
@@ -199,7 +375,7 @@ button {
 }
 
 .knife-rig.is-stuck .knife-belt-slit {
-  animation: belt-slit-appear 780ms ease-out forwards;
+  animation: belt-slit-appear 650ms ease-out forwards;
 }
 
 .knife-handle {
@@ -280,12 +456,15 @@ button {
 .belt-stripes {
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(
+  background-image: linear-gradient(
     90deg,
-    transparent 0 34px,
-    rgba(31, 41, 55, 0.16) 34px 40px
+    rgba(31, 41, 55, 0.2) 0 5px,
+    rgba(255, 255, 255, 0.04) 5px 7px,
+    transparent 7px 40px
   );
-  animation: belt-slide 1.1s linear infinite;
+  background-size: 40px 100%;
+  background-position: 0 0;
+  animation: belt-slide 0.95s linear infinite;
 }
 
 .belt-rail {
@@ -530,6 +709,97 @@ button {
     inset -10px -12px 0 rgba(0, 0, 0, 0.18);
 }
 
+.fruit-celery {
+  width: calc(var(--fruit-size) * 0.34);
+  height: calc(var(--fruit-size) * 1.68);
+  transform: translateY(calc(var(--fruit-size) * -0.42));
+}
+
+.fruit-celery .fruit-shape {
+  width: calc(var(--fruit-size) * 0.28);
+  height: calc(var(--fruit-size) * 1.5);
+  border-radius: 999px 999px 18px 18px;
+  border-color: rgba(30, 88, 52, 0.88);
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.34) 0 18%, transparent 19% 42%, rgba(20, 83, 45, 0.22) 43% 56%, transparent 57%),
+    linear-gradient(180deg, #b8f36b 0%, #78c943 45%, #3f9f46 100%);
+  box-shadow:
+    inset -5px -10px 0 rgba(20, 83, 45, 0.24),
+    inset 4px 8px 0 rgba(255, 255, 255, 0.22);
+}
+
+.fruit-celery .fruit-shape::before,
+.fruit-celery .fruit-shape::after {
+  content: "";
+  position: absolute;
+  top: -12px;
+  width: 12px;
+  height: 24px;
+  border: 3px solid rgba(30, 88, 52, 0.8);
+  border-bottom: 0;
+  border-radius: 999px 999px 0 0;
+  background: #a7e861;
+}
+
+.fruit-celery .fruit-shape::before {
+  left: -8px;
+  transform: rotate(-18deg);
+}
+
+.fruit-celery .fruit-shape::after {
+  right: -8px;
+  transform: rotate(18deg);
+}
+
+.fruit-celery.is-cut .fruit-half::before,
+.fruit-celery.is-cut .fruit-half::after {
+  display: none;
+}
+
+.fruit-celery .cut-face {
+  width: 7px;
+  height: calc(var(--fruit-size) * 1.16);
+  top: 10%;
+  background:
+    linear-gradient(90deg, rgba(237, 255, 209, 0.96), rgba(174, 230, 112, 0.86) 52%, rgba(20, 83, 45, 0.14));
+}
+
+.fruit-starfruit {
+  filter:
+    drop-shadow(0 0 10px rgba(255, 221, 76, 0.7))
+    drop-shadow(0 16px 0 rgba(31, 41, 55, 0.18));
+}
+
+.fruit-starfruit .fruit-whole {
+  width: calc(var(--fruit-size) * 0.84);
+  height: calc(var(--fruit-size) * 0.84);
+  border-color: #9f7417;
+  clip-path: polygon(50% 0, 62% 31%, 96% 18%, 75% 50%, 96% 82%, 62% 69%, 50% 100%, 38% 69%, 4% 82%, 25% 50%, 4% 18%, 38% 31%);
+  background:
+    radial-gradient(circle at 36% 28%, rgba(255, 255, 255, 0.76) 0 11%, transparent 12%),
+    radial-gradient(circle at 63% 68%, rgba(0, 0, 0, 0.14) 0 21%, transparent 22%),
+    linear-gradient(145deg, #fff176 0%, #facc15 50%, #d99a12 100%);
+  box-shadow:
+    0 0 0 5px rgba(255, 236, 153, 0.24),
+    0 0 18px rgba(250, 204, 21, 0.62),
+    inset -9px -11px 0 rgba(140, 92, 13, 0.18),
+    inset 8px 8px 0 rgba(255, 255, 255, 0.22);
+}
+
+.fruit-starfruit .fruit-half {
+  width: calc(var(--fruit-size) * 0.84);
+  height: calc(var(--fruit-size) * 0.84);
+  border-color: #9f7417;
+  border-radius: 38% 52% 45% 55%;
+  background:
+    radial-gradient(circle at 36% 28%, rgba(255, 255, 255, 0.76) 0 11%, transparent 12%),
+    radial-gradient(circle at 63% 68%, rgba(0, 0, 0, 0.14) 0 21%, transparent 22%),
+    linear-gradient(145deg, #fff176 0%, #facc15 50%, #d99a12 100%);
+  box-shadow:
+    inset -9px -11px 0 rgba(140, 92, 13, 0.18),
+    inset 8px 8px 0 rgba(255, 255, 255, 0.22);
+}
+
 .slice-mark {
   width: calc(var(--fruit-size) * 0.76);
   height: 7px;
@@ -667,10 +937,52 @@ button {
 
 @keyframes belt-slide {
   from {
-    transform: translateX(0);
+    background-position: 0 0;
   }
   to {
-    transform: translateX(48px);
+    background-position: 40px 0;
+  }
+}
+
+@keyframes soft-spark {
+  0%,
+  100% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.55) rotate(0deg);
+  }
+  42% {
+    opacity: 1;
+    transform: translateY(-12px) scale(1.16) rotate(18deg);
+  }
+  68% {
+    opacity: 0.72;
+    transform: translateY(-22px) scale(0.88) rotate(42deg);
+  }
+}
+
+@keyframes double-score-glow {
+  0%,
+  100% {
+    opacity: 0.62;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes special-popup-fade {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 8px) scale(0.98);
+  }
+  12%,
+  72% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -10px) scale(0.98);
   }
 }
 
@@ -678,29 +990,35 @@ button {
   0% {
     transform: translateX(-50%) translateY(0);
   }
-  44% {
-    transform: translateX(-50%) translateY(clamp(118px, 19vh, 164px));
+  18% {
+    transform: translateX(-50%) translateY(calc(var(--knife-impact-y) * 0.07));
   }
-  62% {
-    transform: translateX(-50%) translateY(clamp(104px, 17vh, 144px));
+  42% {
+    transform: translateX(-50%) translateY(calc(var(--knife-impact-y) * 0.28));
+  }
+  66% {
+    transform: translateX(-50%) translateY(calc(var(--knife-impact-y) * 0.62));
+  }
+  84% {
+    transform: translateX(-50%) translateY(calc(var(--knife-impact-y) * 0.88));
   }
   100% {
-    transform: translateX(-50%) translateY(0);
+    transform: translateX(-50%) translateY(var(--knife-impact-y));
   }
 }
 
 @keyframes knife-stick {
   0% {
-    transform: translateX(-50%) translateY(clamp(118px, 19vh, 164px)) rotate(0);
+    transform: translateX(-50%) translateY(var(--knife-impact-y)) rotate(0);
   }
-  36% {
-    transform: translateX(-50%) translateY(clamp(126px, 20vh, 174px)) rotate(-4deg);
+  24% {
+    transform: translateX(-50%) translateY(var(--knife-bury-y)) rotate(-1.5deg);
   }
-  64% {
-    transform: translateX(-50%) translateY(clamp(118px, 19vh, 164px)) rotate(-8deg);
+  52% {
+    transform: translateX(-50%) translateY(calc(var(--knife-bury-y) - 1px)) rotate(-3deg);
   }
   100% {
-    transform: translateX(-50%) translateY(clamp(118px, 19vh, 164px)) rotate(-8deg);
+    transform: translateX(-50%) translateY(calc(var(--knife-bury-y) - 1px)) rotate(-3deg);
   }
 }
 
