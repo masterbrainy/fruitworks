@@ -1,4 +1,4 @@
-import { Play, RotateCcw } from "lucide-react";
+import { Maximize2, Minimize2, Play, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 const HIGH_SCORE_KEY = "fruitCutterHighScore";
@@ -307,6 +307,7 @@ function GameOverModal({
 }
 
 export function FruitCutterGame() {
+  const gameFrameRef = useRef<HTMLElement | null>(null);
   const beltRef = useRef<HTMLDivElement | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const timerRef = useRef<number | null>(null);
@@ -334,6 +335,7 @@ export function FruitCutterGame() {
   const [effectPopup, setEffectPopup] = useState<EffectPopup | null>(null);
   const [beltSize, setBeltSize] = useState({ width: 900, height: 190 });
   const [knifeState, setKnifeState] = useState<KnifeState>("ready");
+  const [isImmersiveMode, setIsImmersiveMode] = useState(false);
 
   useEffect(() => {
     fruitsRef.current = fruits;
@@ -777,6 +779,30 @@ export function FruitCutterGame() {
     }, KNIFE_IMPACT_MS);
   }, [cutFruit, endGame, playFailureSound, playSliceSound, setPendingTimer]);
 
+  const toggleImmersiveMode = useCallback(async () => {
+    const frame = gameFrameRef.current;
+    const shouldEnter = !isImmersiveMode;
+
+    if (shouldEnter) {
+      setIsImmersiveMode(true);
+      try {
+        await frame?.requestFullscreen?.({ navigationUI: "hide" });
+        const orientation = screen.orientation as ScreenOrientation & {
+          lock?: (orientation: OrientationLockType) => Promise<void>;
+        };
+        await orientation.lock?.("landscape").catch(() => undefined);
+      } catch {
+        setIsImmersiveMode(true);
+      }
+      return;
+    }
+
+    if (document.fullscreenElement) {
+      await document.exitFullscreen().catch(() => undefined);
+    }
+    setIsImmersiveMode(false);
+  }, [isImmersiveMode]);
+
   useEffect(
     () => () => {
       if (timerRef.current) {
@@ -786,6 +812,15 @@ export function FruitCutterGame() {
     },
     [clearPendingTimers],
   );
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsImmersiveMode(Boolean(document.fullscreenElement));
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
 
   const isDoubleScoreActive = activeEffects.scoreUntil > effectNow && activeEffects.scoreMultiplier === 2;
   const isFreezeActive =
@@ -807,11 +842,24 @@ export function FruitCutterGame() {
   ].filter(Boolean) as Array<{ label: string; time: string }>;
 
   return (
-    <main className="app-shell">
+    <main className={`app-shell${isImmersiveMode ? " is-immersive" : ""}`}>
       <section
-        className={`game-frame${isFreezeActive ? " is-frozen" : ""}${isDoubleScoreActive ? " has-double-score" : ""}`}
+        className={`game-frame${isFreezeActive ? " is-frozen" : ""}${isDoubleScoreActive ? " has-double-score" : ""}${
+          isImmersiveMode ? " is-immersive" : ""
+        }`}
+        ref={gameFrameRef}
         aria-label="Conveyor Fruit Cutter Game"
       >
+        <button
+          aria-pressed={isImmersiveMode}
+          className="fullscreen-action"
+          onClick={toggleImmersiveMode}
+          type="button"
+        >
+          {isImmersiveMode ? <Minimize2 size={18} aria-hidden="true" /> : <Maximize2 size={18} aria-hidden="true" />}
+          <span>{isImmersiveMode ? "Exit" : "Fullscreen"}</span>
+        </button>
+
         {isDoubleScoreActive && (
           <div className="spark-field" aria-hidden="true">
             {Array.from({ length: 14 }, (_, index) => (

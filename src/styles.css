@@ -40,6 +40,10 @@ button {
     linear-gradient(135deg, #ffe7a4 0%, #ffd5c7 46%, #b9e8ff 100%);
 }
 
+.app-shell.is-immersive {
+  padding: 0;
+}
+
 .game-frame {
   width: min(1120px, 100%);
   height: min(720px, calc(100vh - 36px));
@@ -148,6 +152,32 @@ button {
   font-size: 1rem;
 }
 
+.fullscreen-action {
+  min-height: 38px;
+  position: absolute;
+  z-index: 42;
+  top: max(10px, env(safe-area-inset-top));
+  right: max(10px, env(safe-area-inset-right));
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border: 3px solid #1f2937;
+  border-radius: 8px;
+  color: #111827;
+  background: rgba(255, 250, 240, 0.94);
+  font-size: 0.82rem;
+  font-weight: 950;
+  box-shadow: 0 6px 0 rgba(31, 41, 55, 0.14);
+  cursor: pointer;
+}
+
+.fullscreen-action:active {
+  transform: translateY(2px);
+  box-shadow: 0 4px 0 rgba(31, 41, 55, 0.14);
+}
+
 .effect-status-panel {
   position: absolute;
   z-index: 26;
@@ -180,6 +210,131 @@ button {
 
 .effect-badge strong {
   font-size: 1.25rem;
+}
+
+.game-frame.is-immersive,
+.game-frame:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  max-height: none;
+  border-width: 0;
+  border-radius: 0;
+  gap: 6px;
+  padding:
+    max(6px, env(safe-area-inset-top))
+    max(8px, env(safe-area-inset-right))
+    max(6px, env(safe-area-inset-bottom))
+    max(8px, env(safe-area-inset-left));
+  box-shadow: none;
+}
+
+.game-frame.is-immersive .scorebar,
+.game-frame:fullscreen .scorebar {
+  align-items: center;
+  flex-direction: row;
+  gap: 8px;
+  padding-right: 112px;
+}
+
+.game-frame.is-immersive .brand-block,
+.game-frame:fullscreen .brand-block {
+  gap: 8px;
+}
+
+.game-frame.is-immersive .brand-mark,
+.game-frame:fullscreen .brand-mark {
+  width: 34px;
+  height: 34px;
+  border-width: 3px;
+  font-size: 1.15rem;
+}
+
+.game-frame.is-immersive .brand-block p,
+.game-frame:fullscreen .brand-block p {
+  display: none;
+}
+
+.game-frame.is-immersive .brand-block h1,
+.game-frame:fullscreen .brand-block h1 {
+  max-width: none;
+  font-size: clamp(1rem, 3vw, 1.45rem);
+  line-height: 1;
+}
+
+.game-frame.is-immersive .score-cluster,
+.game-frame:fullscreen .score-cluster {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+
+.game-frame.is-immersive .score-pill,
+.game-frame:fullscreen .score-pill {
+  min-width: 70px;
+  padding: 4px 8px;
+  border-width: 2px;
+}
+
+.game-frame.is-immersive .score-pill span,
+.game-frame:fullscreen .score-pill span {
+  font-size: 0.66rem;
+}
+
+.game-frame.is-immersive .score-pill strong,
+.game-frame:fullscreen .score-pill strong {
+  font-size: clamp(1.15rem, 4vh, 1.65rem);
+}
+
+.game-frame.is-immersive .factory-scene,
+.game-frame:fullscreen .factory-scene {
+  min-height: 0;
+  padding-top: 0;
+  transform: none;
+}
+
+.game-frame.is-immersive .knife-rig,
+.game-frame:fullscreen .knife-rig {
+  --knife-impact-y: clamp(156px, 46vh, 204px);
+  --knife-bury-y: clamp(164px, 48vh, 212px);
+  top: clamp(-132px, -31vh, -86px);
+}
+
+.game-frame.is-immersive .machine-top,
+.game-frame:fullscreen .machine-top {
+  width: min(62%, 520px);
+  height: 32px;
+  margin-bottom: -4px;
+  padding: 6px 14px;
+}
+
+.game-frame.is-immersive .machine-top span,
+.game-frame:fullscreen .machine-top span {
+  height: 9px;
+}
+
+.game-frame.is-immersive .belt-wrap,
+.game-frame:fullscreen .belt-wrap {
+  grid-template-columns: 24px minmax(0, 1fr) 24px;
+  min-height: clamp(118px, 38vh, 152px);
+}
+
+.game-frame.is-immersive .conveyor-belt,
+.game-frame:fullscreen .conveyor-belt {
+  height: clamp(118px, 38vh, 152px);
+  border-width: 5px;
+  border-bottom-width: 10px;
+}
+
+.game-frame.is-immersive .cut-scrap-layer,
+.game-frame:fullscreen .cut-scrap-layer {
+  top: calc(100% - 12px);
+  height: 58px;
+}
+
+.game-frame.is-immersive .table-legs span,
+.game-frame:fullscreen .table-legs span {
+  height: clamp(16px, 5vh, 30px);
 }
 
 .scorebar {
@@ -1417,6 +1572,16 @@ button {
 
   .primary-action {
     width: min(100%, 360px);
+  }
+}
+
+@media (pointer: coarse), (max-width: 960px) {
+  .fullscreen-action {
+    display: inline-flex;
+  }
+
+  .scorebar {
+    padding-right: 112px;
   }
 }
 
