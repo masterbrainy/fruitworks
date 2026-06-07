@@ -42,21 +42,33 @@ const fruitTypes: FruitType[] = [
   "lime",
 ];
 
+const fruitSettings: Record<FruitType, { minSize: number; maxSize: number; hitScale: number; speedBias: number }> = {
+  apple: { minSize: 66, maxSize: 78, hitScale: 0.72, speedBias: 0 },
+  orange: { minSize: 70, maxSize: 82, hitScale: 0.74, speedBias: 0 },
+  grapes: { minSize: 34, maxSize: 44, hitScale: 0.44, speedBias: -6 },
+  banana: { minSize: 108, maxSize: 124, hitScale: 0.88, speedBias: -8 },
+  watermelon: { minSize: 84, maxSize: 98, hitScale: 0.82, speedBias: -2 },
+  rambutan: { minSize: 58, maxSize: 70, hitScale: 0.62, speedBias: 4 },
+  lemon: { minSize: 58, maxSize: 72, hitScale: 0.66, speedBias: 2 },
+  lime: { minSize: 52, maxSize: 64, hitScale: 0.58, speedBias: 5 },
+};
+
 const randomBetween = (min: number, max: number) => Math.random() * (max - min) + min;
 
 const pickFruitType = () => fruitTypes[Math.floor(Math.random() * fruitTypes.length)];
 
 const createFruit = (beltHeight: number, elapsedSeconds: number): Fruit => {
   const type = pickFruitType();
-  const size = randomBetween(58, 92);
-  const maxY = Math.max(8, beltHeight - size - 10);
-  const speed = Math.min(178, 72 + elapsedSeconds * 2.7 + randomBetween(-5, 14));
+  const settings = fruitSettings[type];
+  const size = randomBetween(settings.minSize, settings.maxSize);
+  const laneCenter = beltHeight * 0.58;
+  const speed = Math.min(188, 76 + elapsedSeconds * 2.9 + settings.speedBias + randomBetween(-4, 9));
 
   return {
     id: Date.now() + Math.floor(Math.random() * 10000),
     type,
     x: -size - 18,
-    y: randomBetween(8, maxY),
+    y: laneCenter - size / 2,
     size,
     speed,
     cut: false,
@@ -126,7 +138,6 @@ function GameOverModal({
 export function FruitCutterGame() {
   const beltRef = useRef<HTMLDivElement | null>(null);
   const timerRef = useRef<number | null>(null);
-  const spawnTimerRef = useRef<number | null>(null);
   const lastFrameRef = useRef(0);
   const startTimeRef = useRef(0);
   const fruitIdRef = useRef(1);
@@ -135,6 +146,7 @@ export function FruitCutterGame() {
   const gameStateRef = useRef<GameState>("idle");
   const beltSizeRef = useRef({ width: 900, height: 190 });
   const knifeDroppingRef = useRef(false);
+  const pendingTimerRefs = useRef<number[]>([]);
 
   const [gameState, setGameState] = useState<GameState>("idle");
   const [score, setScore] = useState(0);
@@ -142,7 +154,7 @@ export function FruitCutterGame() {
   const [fruits, setFruits] = useState<Fruit[]>([]);
   const [floatingPoints, setFloatingPoints] = useState<FloatingPoint[]>([]);
   const [beltSize, setBeltSize] = useState({ width: 900, height: 190 });
-  const [knifeDropping, setKnifeDropping] = useState(false);
+  const [knifeState, setKnifeState] = useState<"ready" | "dropping" | "stuck">("ready");
 
   useEffect(() => {
     fruitsRef.current = fruits;
@@ -167,8 +179,9 @@ export function FruitCutterGame() {
     }
 
     const updateSize = () => {
-      const rect = belt.getBoundingClientRect();
-      setBeltSize({ width: rect.width, height: rect.height });
+      const nextBeltSize = { width: belt.clientWidth, height: belt.clientHeight };
+      beltSizeRef.current = nextBeltSize;
+      setBeltSize(nextBeltSize);
     };
 
     updateSize();
@@ -178,17 +191,41 @@ export function FruitCutterGame() {
     return () => observer.disconnect();
   }, []);
 
+  const clearPendingTimers = useCallback(() => {
+    pendingTimerRefs.current.forEach((timer) => window.clearTimeout(timer));
+    pendingTimerRefs.current = [];
+  }, []);
+
+  const setPendingTimer = useCallback((callback: () => void, delay: number) => {
+    const timer = window.setTimeout(() => {
+      pendingTimerRefs.current = pendingTimerRefs.current.filter((pendingTimer) => pendingTimer !== timer);
+      callback();
+    }, delay);
+
+    pendingTimerRefs.current = [...pendingTimerRefs.current, timer];
+    return timer;
+  }, []);
+
+  const makeNextFruit = useCallback((startX?: number) => {
+    if (beltRef.current) {
+      beltSizeRef.current = { width: beltRef.current.clientWidth, height: beltRef.current.clientHeight };
+    }
+
+    const elapsedSeconds = (performance.now() - startTimeRef.current) / 1000;
+    const nextFruit = createFruit(beltSizeRef.current.height, elapsedSeconds);
+    nextFruit.id = fruitIdRef.current;
+    nextFruit.x = startX ?? -nextFruit.size - 18;
+    fruitIdRef.current += 1;
+    return nextFruit;
+  }, []);
+
   const endGame = useCallback(() => {
     if (timerRef.current) {
       window.clearInterval(timerRef.current);
       timerRef.current = null;
     }
 
-    if (spawnTimerRef.current) {
-      window.clearTimeout(spawnTimerRef.current);
-      spawnTimerRef.current = null;
-    }
-
+    clearPendingTimers();
     gameStateRef.current = "gameOver";
     setGameState("gameOver");
     setFruits([]);
@@ -199,7 +236,7 @@ export function FruitCutterGame() {
       window.localStorage.setItem(HIGH_SCORE_KEY, String(nextHighScore));
       return nextHighScore;
     });
-  }, []);
+  }, [clearPendingTimers]);
 
   const tickGame = useCallback(() => {
     if (gameStateRef.current !== "playing") {
@@ -213,7 +250,7 @@ export function FruitCutterGame() {
     lastFrameRef.current = now;
 
     setFruits((currentFruits) => {
-      let nextFruits = currentFruits
+      const nextFruits = currentFruits
         .map((fruit) =>
           fruit.cut
             ? fruit
@@ -225,7 +262,7 @@ export function FruitCutterGame() {
         .filter((fruit) => fruit.cut || fruit.x < currentBeltSize.width + fruit.size + 8);
 
       const missedFruit = nextFruits.some(
-        (fruit) => !fruit.cut && fruit.x > currentBeltSize.width - Math.max(16, fruit.size * 0.35),
+        (fruit) => !fruit.cut && fruit.x > currentBeltSize.width + fruit.size * 0.45,
       );
 
       if (missedFruit) {
@@ -237,45 +274,25 @@ export function FruitCutterGame() {
     });
   }, [endGame]);
 
-  const scheduleNextSpawn = useCallback(() => {
-    if (gameStateRef.current !== "playing") {
-      return;
-    }
-
-    const elapsedSeconds = (performance.now() - startTimeRef.current) / 1000;
-    const spawnGap = Math.max(610, 1120 - Math.min(elapsedSeconds, 52) * 10);
-
-    spawnTimerRef.current = window.setTimeout(() => {
-      if (gameStateRef.current !== "playing") {
-        return;
-      }
-
-      const freshFruit = createFruit(beltSizeRef.current.height, elapsedSeconds);
-      freshFruit.id = fruitIdRef.current;
-      fruitIdRef.current += 1;
-
-      setFruits((currentFruits) => [...currentFruits, freshFruit]);
-      scheduleNextSpawn();
-    }, spawnGap + randomBetween(-120, 210));
-  }, []);
-
   const startGame = useCallback(() => {
     if (timerRef.current) {
       window.clearInterval(timerRef.current);
     }
 
-    if (spawnTimerRef.current) {
-      window.clearTimeout(spawnTimerRef.current);
+    clearPendingTimers();
+
+    if (beltRef.current) {
+      beltSizeRef.current = { width: beltRef.current.clientWidth, height: beltRef.current.clientHeight };
     }
 
     const starterFruit = createFruit(beltSizeRef.current.height, 0);
     starterFruit.id = fruitIdRef.current;
-    starterFruit.x = 18;
+    starterFruit.x = -starterFruit.size - 18;
     fruitIdRef.current += 1;
 
     setScore(0);
     setFloatingPoints([]);
-    setKnifeDropping(false);
+    setKnifeState("ready");
     knifeDroppingRef.current = false;
     setFruits([starterFruit]);
     setGameState("playing");
@@ -286,8 +303,7 @@ export function FruitCutterGame() {
     lastFrameRef.current = performance.now();
     tickGame();
     timerRef.current = window.setInterval(tickGame, 16);
-    scheduleNextSpawn();
-  }, [scheduleNextSpawn, tickGame]);
+  }, [clearPendingTimers, tickGame]);
 
   const cutFruit = useCallback((fruit: Fruit) => {
     if (gameStateRef.current !== "playing" || fruit.cut) {
@@ -296,7 +312,7 @@ export function FruitCutterGame() {
 
     setScore((currentScore) => currentScore + 1);
     setFloatingPoints((points) => [...points, { id: fruit.id, x: fruit.x + fruit.size / 2, y: fruit.y }]);
-    window.setTimeout(() => {
+    setPendingTimer(() => {
       setFloatingPoints((points) => points.filter((point) => point.id !== fruit.id));
     }, 760);
 
@@ -306,53 +322,71 @@ export function FruitCutterGame() {
       ),
     );
 
-    window.setTimeout(() => {
+    setPendingTimer(() => {
       setFruits((currentFruits) => currentFruits.filter((currentFruit) => currentFruit.id !== fruit.id));
     }, 190);
-  }, []);
+
+    setPendingTimer(() => {
+      if (gameStateRef.current !== "playing") {
+        return;
+      }
+
+      const nextFruit = makeNextFruit();
+      setFruits([nextFruit]);
+    }, 380);
+  }, [makeNextFruit, setPendingTimer]);
 
   const dropKnife = useCallback(() => {
     if (gameStateRef.current !== "playing" || knifeDroppingRef.current) {
       return;
     }
 
+    if (beltRef.current) {
+      beltSizeRef.current = { width: beltRef.current.clientWidth, height: beltRef.current.clientHeight };
+    }
+
     knifeDroppingRef.current = true;
-    setKnifeDropping(true);
+    setKnifeState("dropping");
 
     const knifeX = beltSizeRef.current.width / 2;
-    const cutZonePadding = 24;
     const hittableFruit = fruitsRef.current
       .filter((fruit) => !fruit.cut)
       .map((fruit) => {
         const fruitCenter = fruit.x + fruit.size / 2;
+        const hitHalfWidth = fruit.size * fruitSettings[fruit.type].hitScale * 0.5;
         return {
           fruit,
           distance: Math.abs(fruitCenter - knifeX),
+          hitHalfWidth,
         };
       })
-      .filter(({ fruit, distance }) => distance <= fruit.size * 0.62 + cutZonePadding)
+      .filter(({ distance, hitHalfWidth }) => distance <= hitHalfWidth)
       .sort((first, second) => first.distance - second.distance)[0]?.fruit;
 
     if (hittableFruit) {
-      window.setTimeout(() => cutFruit(hittableFruit), 135);
+      setPendingTimer(() => cutFruit(hittableFruit), 135);
+      setPendingTimer(() => {
+        knifeDroppingRef.current = false;
+        setKnifeState("ready");
+      }, 430);
+      return;
     }
 
-    window.setTimeout(() => {
+    setKnifeState("stuck");
+    setPendingTimer(() => {
       knifeDroppingRef.current = false;
-      setKnifeDropping(false);
-    }, 430);
-  }, [cutFruit]);
+      endGame();
+    }, 780);
+  }, [cutFruit, endGame, setPendingTimer]);
 
   useEffect(
     () => () => {
       if (timerRef.current) {
         window.clearInterval(timerRef.current);
       }
-      if (spawnTimerRef.current) {
-        window.clearTimeout(spawnTimerRef.current);
-      }
+      clearPendingTimers();
     },
-    [],
+    [clearPendingTimers],
   );
 
   return (
@@ -400,7 +434,7 @@ export function FruitCutterGame() {
           role="button"
           tabIndex={gameState === "playing" ? 0 : -1}
         >
-          <div className={`knife-rig${knifeDropping ? " is-dropping" : ""}`} aria-hidden="true">
+          <div className={`knife-rig is-${knifeState}`} aria-hidden="true">
             <span className="knife-handle" />
             <span className="knife-blade" />
           </div>
