@@ -319,6 +319,12 @@ button {
   min-height: clamp(118px, 38vh, 152px);
 }
 
+.game-frame.is-immersive .fruit-layer,
+.game-frame:fullscreen .fruit-layer {
+  left: 24px;
+  right: 24px;
+}
+
 .game-frame.is-immersive .conveyor-belt,
 .game-frame:fullscreen .conveyor-belt {
   height: clamp(118px, 38vh, 152px);
@@ -671,6 +677,18 @@ button {
   border-radius: 0 8px 8px 0;
 }
 
+.fruit-layer {
+  position: absolute;
+  left: 34px;
+  right: 34px;
+  top: -80px;
+  height: calc(100% + 80px);
+  z-index: 6;
+  pointer-events: none;
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
 .cut-scrap-layer {
   position: absolute;
   left: 0;
@@ -686,6 +704,7 @@ button {
   --scrap-size: 28px;
   --scrap-rotation: 0deg;
   --scrap-settle-y: 24px;
+  --scrap-start-x: 0px;
   width: var(--scrap-size);
   height: calc(var(--scrap-size) * 0.72);
   position: absolute;
@@ -818,6 +837,7 @@ button {
   user-select: none;
   transform-origin: center;
   perspective: 280px;
+  translate: 0 80px;
   filter: drop-shadow(0 16px 0 rgba(31, 41, 55, 0.18));
 }
 
@@ -1200,6 +1220,7 @@ button {
   position: absolute;
   z-index: 8;
   pointer-events: none;
+  translate: 0 80px;
   color: #102033;
   font-size: clamp(1.45rem, 4vw, 2.1rem);
   font-weight: 1000;
@@ -1452,14 +1473,16 @@ button {
 @keyframes scrap-drop {
   0% {
     opacity: 0;
-    transform: translate(-50%, -120px) rotate(calc(var(--scrap-rotation) - 26deg)) scale(0.78);
+    transform: translate(calc(-50% + var(--scrap-start-x)), -120px) rotate(calc(var(--scrap-rotation) - 26deg))
+      scale(0.78);
   }
   18% {
     opacity: 1;
   }
   72% {
     opacity: 1;
-    transform: translate(-50%, calc(var(--scrap-settle-y) + 7px)) rotate(calc(var(--scrap-rotation) + 7deg)) scale(1);
+    transform: translate(-50%, calc(var(--scrap-settle-y) + 7px)) rotate(calc(var(--scrap-rotation) + 7deg))
+      scale(1);
   }
   100% {
     opacity: 1;
@@ -1560,6 +1583,11 @@ button {
   .belt-wrap {
     grid-template-columns: 24px minmax(0, 1fr) 24px;
     min-height: 176px;
+  }
+
+  .fruit-layer {
+    left: 24px;
+    right: 24px;
   }
 
   .conveyor-belt {
@@ -1705,6 +1733,11 @@ button {
   .belt-wrap {
     grid-template-columns: 24px minmax(0, 1fr) 24px;
     min-height: clamp(118px, 38vh, 152px);
+  }
+
+  .fruit-layer {
+    left: 24px;
+    right: 24px;
   }
 
   .conveyor-belt {

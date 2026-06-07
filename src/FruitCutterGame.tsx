@@ -83,6 +83,7 @@ type CutScrap = {
   id: number;
   type: FruitType;
   x: number;
+  startX: number;
   size: number;
   rotation: number;
   settleY: number;
@@ -102,7 +103,7 @@ const fruitTypes: FruitType[] = [
 
 const fruitSettings: Record<
   FruitType,
-  { minSize: number; maxSize: number; hitScale: number; speedBias: number; visualWidthScale?: number }
+  { minSize: number; maxSize: number; hitScale: number; speedBias: number; visualWidthScale?: number; baseAnchorScale?: number }
 > = {
   apple: { minSize: 66, maxSize: 78, hitScale: 0.72, speedBias: 0 },
   orange: { minSize: 70, maxSize: 82, hitScale: 0.74, speedBias: 0 },
@@ -112,7 +113,7 @@ const fruitSettings: Record<
   rambutan: { minSize: 58, maxSize: 70, hitScale: 0.62, speedBias: 4 },
   lemon: { minSize: 58, maxSize: 72, hitScale: 0.66, speedBias: 2 },
   lime: { minSize: 52, maxSize: 64, hitScale: 0.58, speedBias: 5 },
-  sugarcane: { minSize: 92, maxSize: 110, hitScale: 0.78, speedBias: 3, visualWidthScale: 0.54 },
+  sugarcane: { minSize: 92, maxSize: 110, hitScale: 0.78, speedBias: 3, visualWidthScale: 0.54, baseAnchorScale: 0.92 },
   starfruit: { minSize: 72, maxSize: 84, hitScale: 0.78, speedBias: -2 },
 };
 
@@ -170,13 +171,14 @@ const createFruit = (
   const tinyFruitScale = activeEffects.tinyFruitUntil > now && type !== "starfruit" ? 0.62 : 1;
   const size = randomBetween(settings.minSize, settings.maxSize) * tinyFruitScale;
   const laneCenter = beltHeight * 0.49;
+  const y = settings.baseAnchorScale ? laneCenter - size * settings.baseAnchorScale : laneCenter - size / 2;
   const speed = Math.min(283.4, 135.2 + elapsedSeconds * 2.9 + settings.speedBias + randomBetween(-4, 9));
 
   return {
     id: Date.now() + Math.floor(Math.random() * 10000),
     type,
-    x: -size - 18,
-    y: laneCenter - size / 2,
+    x: -size,
+    y,
     size,
     speed,
     cut: false,
@@ -265,6 +267,7 @@ function CutScrapPiece({ scrap }: { scrap: CutScrap }) {
         "--scrap-size": `${scrap.size}px`,
         "--scrap-rotation": `${scrap.rotation}deg`,
         "--scrap-settle-y": `${scrap.settleY}px`,
+        "--scrap-start-x": `${scrap.startX - scrap.x}px`,
         left: `${scrap.x}px`,
       } as React.CSSProperties}
     >
@@ -668,15 +671,24 @@ export function FruitCutterGame() {
     setScore((currentScore) => currentScore + scoreDelta);
     setCutScraps((scraps) => {
       const scrapSize = Math.max(18, Math.min(42, fruit.size * 0.38));
-      const nextScrap: CutScrap = {
-        id: fruit.id,
-        type: fruit.type,
-        x: 34 + impactX,
-        size: scrapSize,
-        rotation: randomBetween(-28, 28),
-        settleY: randomBetween(12, 42),
-      };
-      return [...scraps.slice(-31), nextScrap];
+      const startX = 34 + impactX;
+      const beltWidth = beltSizeRef.current.width;
+      const minimumX = 44;
+      const maximumX = beltWidth + 24;
+      const spread = Math.min(180, Math.max(70, fruit.size * 1.2));
+      const nextScraps: CutScrap[] = [-1, 1].map((direction, index) => {
+        const drift = direction * randomBetween(spread * 0.45, spread);
+        return {
+          id: fruit.id * 10 + index,
+          type: fruit.type,
+          x: Math.min(maximumX, Math.max(minimumX, startX + drift + randomBetween(-28, 28))),
+          startX,
+          size: scrapSize * randomBetween(0.82, 1.08),
+          rotation: randomBetween(18, 46) * direction,
+          settleY: randomBetween(10, 48),
+        };
+      });
+      return [...scraps.slice(-62), ...nextScraps];
     });
     setFloatingPoints((points) => [...points, { id: fruit.id, x: impactX, y: fruit.y, value: scoreDelta }]);
     setPendingTimer(() => {
@@ -946,6 +958,8 @@ export function FruitCutterGame() {
               <div className="belt-stripes" aria-hidden="true" />
               <div className="belt-rail belt-rail-top" aria-hidden="true" />
               <div className="belt-rail belt-rail-bottom" aria-hidden="true" />
+            </div>
+            <div className="fruit-layer" aria-hidden="true">
               {fruits.map((fruit) => (
                 <FruitSprite fruit={fruit} key={fruit.id} />
               ))}
