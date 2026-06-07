@@ -4,6 +4,11 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 const HIGH_SCORE_KEY = "fruitCutterHighScore";
 const KNIFE_IMPACT_MS = 980;
 const KNIFE_RESPAWN_MS = 260;
+const KNIFE_COLLISION_WIDTH: Record<KnifeMode, number> = {
+  normal: 40,
+  wide: 66,
+  skinny: 20,
+};
 
 type GameState = "idle" | "playing" | "gameOver";
 type KnifeState = "ready" | "dropping" | "hidden" | "stuck";
@@ -19,7 +24,7 @@ type FruitType =
   | "rambutan"
   | "lemon"
   | "lime"
-  | "celery"
+  | "sugarcane"
   | "starfruit";
 
 type ActiveEffects = {
@@ -92,10 +97,13 @@ const fruitTypes: FruitType[] = [
   "rambutan",
   "lemon",
   "lime",
-  "celery",
+  "sugarcane",
 ];
 
-const fruitSettings: Record<FruitType, { minSize: number; maxSize: number; hitScale: number; speedBias: number }> = {
+const fruitSettings: Record<
+  FruitType,
+  { minSize: number; maxSize: number; hitScale: number; speedBias: number; visualWidthScale?: number }
+> = {
   apple: { minSize: 66, maxSize: 78, hitScale: 0.72, speedBias: 0 },
   orange: { minSize: 70, maxSize: 82, hitScale: 0.74, speedBias: 0 },
   grapes: { minSize: 34, maxSize: 44, hitScale: 0.44, speedBias: -6 },
@@ -104,7 +112,7 @@ const fruitSettings: Record<FruitType, { minSize: number; maxSize: number; hitSc
   rambutan: { minSize: 58, maxSize: 70, hitScale: 0.62, speedBias: 4 },
   lemon: { minSize: 58, maxSize: 72, hitScale: 0.66, speedBias: 2 },
   lime: { minSize: 52, maxSize: 64, hitScale: 0.58, speedBias: 5 },
-  celery: { minSize: 92, maxSize: 110, hitScale: 0.2, speedBias: 6 },
+  sugarcane: { minSize: 92, maxSize: 110, hitScale: 0.78, speedBias: 3, visualWidthScale: 0.54 },
   starfruit: { minSize: 72, maxSize: 84, hitScale: 0.78, speedBias: -2 },
 };
 
@@ -188,6 +196,35 @@ const loadHighScore = () => {
 
 const formatRemaining = (until: number, now: number) => `${Math.max(0, Math.ceil((until - now) / 1000))}s`;
 
+function StarfruitSvg() {
+  return (
+    <svg className="starfruit-svg" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+      <defs>
+        <radialGradient id="starfruitCenter" cx="50%" cy="50%" r="64%">
+          <stop offset="0%" stopColor="#fff4a9" />
+          <stop offset="42%" stopColor="#ffd94a" />
+          <stop offset="100%" stopColor="#efa414" />
+        </radialGradient>
+      </defs>
+      <path
+        className="starfruit-body"
+        d="M50 4 C57 19 60 32 62 43 C73 37 87 32 98 31 C89 42 79 49 68 55 C76 67 83 81 87 96 C73 88 61 78 50 67 C39 78 27 88 13 96 C17 81 24 67 32 55 C21 49 11 42 2 31 C13 32 27 37 38 43 C40 32 43 19 50 4 Z"
+      />
+      <path className="starfruit-center" d="M50 35 C60 38 65 46 63 55 C60 65 51 70 42 66 C34 63 30 54 34 46 C37 38 42 35 50 35 Z" />
+      <path className="starfruit-ridge" d="M50 55 C50 41 50 24 50 7" />
+      <path className="starfruit-ridge" d="M50 55 C61 47 78 38 96 31" />
+      <path className="starfruit-ridge" d="M50 55 C59 67 73 83 86 95" />
+      <path className="starfruit-ridge" d="M50 55 C41 67 27 83 14 95" />
+      <path className="starfruit-ridge" d="M50 55 C39 47 22 38 4 31" />
+      <ellipse className="starfruit-seed" cx="44" cy="52" rx="2.5" ry="5.2" transform="rotate(78 44 52)" />
+      <ellipse className="starfruit-seed" cx="55" cy="45" rx="2.2" ry="5" transform="rotate(8 55 45)" />
+      <ellipse className="starfruit-seed" cx="56" cy="59" rx="2.2" ry="4.8" transform="rotate(-42 56 59)" />
+      <path className="starfruit-shine" d="M22 37 C34 41 42 46 49 52" />
+      <path className="starfruit-shine" d="M50 12 C52 27 52 40 50 52" />
+    </svg>
+  );
+}
+
 function FruitSprite({ fruit }: { fruit: Fruit }) {
   const cutPercent = Math.min(78, Math.max(22, fruit.cutPercent));
 
@@ -209,6 +246,8 @@ function FruitSprite({ fruit }: { fruit: Fruit }) {
           <span className="fruit-shape fruit-half fruit-half-right" />
           <span className="cut-face" />
         </>
+      ) : fruit.type === "starfruit" ? (
+        <StarfruitSvg />
       ) : (
         <span className="fruit-shape fruit-whole" />
       )}
@@ -602,7 +641,7 @@ export function FruitCutterGame() {
     timerRef.current = window.setInterval(tickGame, 16);
   }, [clearPendingTimers, makeNextFruit, tickGame]);
 
-  const cutFruit = useCallback((fruit: Fruit, cutX: number) => {
+  const cutFruit = useCallback((fruit: Fruit, cutX: number, impactX = fruit.x + cutX) => {
     if (gameStateRef.current !== "playing" || fruit.cut) {
       return;
     }
@@ -630,14 +669,14 @@ export function FruitCutterGame() {
       const nextScrap: CutScrap = {
         id: fruit.id,
         type: fruit.type,
-        x: 34 + fruit.x + cutX,
+        x: 34 + impactX,
         size: scrapSize,
         rotation: randomBetween(-28, 28),
         settleY: randomBetween(12, 42),
       };
       return [...scraps.slice(-31), nextScrap];
     });
-    setFloatingPoints((points) => [...points, { id: fruit.id, x: fruit.x + cutX, y: fruit.y, value: scoreDelta }]);
+    setFloatingPoints((points) => [...points, { id: fruit.id, x: impactX, y: fruit.y, value: scoreDelta }]);
     setPendingTimer(() => {
       setFloatingPoints((points) => points.filter((point) => point.id !== fruit.id));
     }, 760);
@@ -680,27 +719,28 @@ export function FruitCutterGame() {
     setKnifeState("dropping");
 
     setPendingTimer(() => {
-      const bladeRect = document.querySelector(".knife-blade")?.getBoundingClientRect();
-      const knifeX = bladeRect ? bladeRect.left + bladeRect.width / 2 : window.innerWidth / 2;
-      const bladeAllowance = bladeRect ? bladeRect.width * 0.18 : 6;
+      const now = performance.now();
+      const currentEffects = activeEffectsRef.current;
+      const currentKnifeMode =
+        currentEffects.knifeUntil > now && currentEffects.knifeMode !== "normal" ? currentEffects.knifeMode : "normal";
+      const knifeX = beltSizeRef.current.width * 0.5;
+      const hitAllowance = KNIFE_COLLISION_WIDTH[currentKnifeMode] * 0.18 + 4;
       const hittableFruit = fruitsRef.current
         .filter((fruit) => !fruit.cut)
         .map((fruit) => {
-          const fruitElement = document.querySelector(`[data-fruit-id="${fruit.id}"]`);
-          const fruitRect = fruitElement?.getBoundingClientRect();
-          const fruitCenter = fruitRect ? fruitRect.left + fruitRect.width / 2 : fruit.x + fruit.size / 2;
-          const visualWidth = fruitRect?.width ?? fruit.size;
-          const visualLeft = fruitRect?.left ?? fruit.x;
+          const settings = fruitSettings[fruit.type];
+          const visualWidth = fruit.size * (settings.visualWidthScale ?? 1);
+          const visualLeft = fruit.x;
           const visualRight = visualLeft + visualWidth;
+          const fruitCenter = visualLeft + visualWidth / 2;
           const cutX = ((knifeX - visualLeft) / visualWidth) * fruit.size;
-          const hitHalfWidth = fruit.size * fruitSettings[fruit.type].hitScale * 0.5;
-          const hitAllowance = fruit.type === "celery" ? 1 : bladeAllowance + 4;
-          const visualHitHalfWidth = visualWidth * fruitSettings[fruit.type].hitScale * 0.5 + hitAllowance;
+          const visualHitHalfWidth = visualWidth * settings.hitScale * 0.5 + hitAllowance;
           return {
             fruit,
             cutX,
             distance: Math.abs(fruitCenter - knifeX),
-            hitHalfWidth: visualHitHalfWidth || hitHalfWidth,
+            hitHalfWidth: visualHitHalfWidth,
+            impactX: knifeX,
             edgeAllowance: hitAllowance,
             visualLeft,
             visualRight,
@@ -718,7 +758,7 @@ export function FruitCutterGame() {
 
       if (hittableFruit) {
         playSliceSound();
-        cutFruit(hittableFruit.fruit, hittableFruit.cutX);
+        cutFruit(hittableFruit.fruit, hittableFruit.cutX, hittableFruit.impactX);
         setKnifeState("hidden");
         setPendingTimer(() => {
           knifeDroppingRef.current = false;
@@ -782,7 +822,7 @@ export function FruitCutterGame() {
 
         {effectPopup && (
           <div className={`special-popup is-${effectPopup.polarity}`} aria-live="polite">
-            <strong>Special Star Effect:</strong>
+            <strong>Special Starfruit Effect:</strong>
             <span>{effectPopup.message}</span>
           </div>
         )}
