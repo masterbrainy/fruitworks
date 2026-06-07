@@ -243,8 +243,8 @@ button {
   border: 6px solid #26313f;
   border-bottom-width: 14px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.26), rgba(255, 255, 255, 0.04) 44%, rgba(0, 0, 0, 0.24) 100%),
-    linear-gradient(90deg, #6d7a89, #44515f 48%, #6a7683);
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0 18%, transparent 19% 62%, rgba(0, 0, 0, 0.28) 100%),
+    linear-gradient(90deg, #707d8b, #44515f 48%, #687584);
   touch-action: manipulation;
   box-shadow:
     inset 0 -26px 0 rgba(32, 41, 54, 0.24),
@@ -252,32 +252,15 @@ button {
     0 30px 18px rgba(31, 41, 55, 0.2);
 }
 
-.conveyor-belt::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  z-index: 1;
-  height: 58px;
-  transform: translateY(-4px);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 40%, rgba(0, 0, 0, 0.12)),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.12) 0 20px, rgba(255, 255, 255, 0.02) 20px 54px);
-  border-block: 2px solid rgba(255, 255, 255, 0.18);
-  pointer-events: none;
-}
-
 .belt-stripes {
   position: absolute;
   inset: 0;
   background: repeating-linear-gradient(
     90deg,
-    rgba(255, 255, 255, 0.2) 0 16px,
-    rgba(255, 255, 255, 0.04) 16px 48px
+    transparent 0 34px,
+    rgba(31, 41, 55, 0.16) 34px 40px
   );
   animation: belt-slide 1.1s linear infinite;
-  transform: skewY(-4deg);
 }
 
 .belt-rail {
