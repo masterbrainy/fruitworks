@@ -177,6 +177,31 @@ button {
   animation: knife-stick 780ms cubic-bezier(0.16, 0.92, 0.2, 1) forwards;
 }
 
+.knife-rig.is-stuck .knife-blade {
+  height: 66px;
+  clip-path: polygon(20% 0, 80% 0, 68% 76%, 50% 91%, 32% 76%);
+  background:
+    linear-gradient(110deg, rgba(255, 255, 255, 0.96) 0 24%, rgba(255, 255, 255, 0.22) 25% 39%, transparent 40%),
+    linear-gradient(180deg, #f7fbff, #9faab7);
+}
+
+.knife-belt-slit {
+  width: 50px;
+  height: 15px;
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  border: 3px solid rgba(31, 41, 55, 0.88);
+  border-radius: 50%;
+  background: rgba(17, 24, 39, 0.6);
+  opacity: 0;
+  transform: translateX(-50%) scaleX(0.72);
+}
+
+.knife-rig.is-stuck .knife-belt-slit {
+  animation: belt-slit-appear 780ms ease-out forwards;
+}
+
 .knife-handle {
   width: 25px;
   height: 58px;
@@ -314,6 +339,8 @@ button {
 
 .fruit-sprite {
   --fruit-size: 72px;
+  --cut-x: 50%;
+  --shape-tilt: 0deg;
   width: var(--fruit-size);
   height: var(--fruit-size);
   position: absolute;
@@ -323,6 +350,7 @@ button {
   pointer-events: none;
   user-select: none;
   transform-origin: center;
+  perspective: 280px;
   filter: drop-shadow(0 16px 0 rgba(31, 41, 55, 0.18));
 }
 
@@ -333,6 +361,7 @@ button {
   display: block;
   border: 4px solid rgba(31, 41, 55, 0.82);
   border-radius: 50%;
+  transform: rotate(var(--shape-tilt));
   background:
     radial-gradient(circle at 30% 24%, rgba(255, 255, 255, 0.72) 0 12%, transparent 13%),
     radial-gradient(circle at 63% 68%, rgba(0, 0, 0, 0.16) 0 22%, transparent 23%),
@@ -340,6 +369,53 @@ button {
   box-shadow:
     inset -10px -12px 0 rgba(0, 0, 0, 0.18),
     inset 8px 8px 0 rgba(255, 255, 255, 0.18);
+}
+
+.fruit-half {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-origin: center;
+  backface-visibility: hidden;
+}
+
+.fruit-half-left {
+  clip-path: polygon(0 0, calc(var(--cut-x) + 5%) 0, calc(var(--cut-x) - 8%) 100%, 0 100%);
+}
+
+.fruit-half-right {
+  clip-path: polygon(calc(var(--cut-x) + 5%) 0, 100% 0, 100% 100%, calc(var(--cut-x) - 8%) 100%);
+}
+
+.fruit-sprite.is-cut .fruit-half-left {
+  animation: split-left 520ms cubic-bezier(0.17, 0.77, 0.25, 1) forwards;
+}
+
+.fruit-sprite.is-cut .fruit-half-right {
+  animation: split-right 520ms cubic-bezier(0.17, 0.77, 0.25, 1) forwards;
+}
+
+.cut-face {
+  width: 10px;
+  height: calc(var(--fruit-size) * 0.68);
+  position: absolute;
+  z-index: 3;
+  left: var(--cut-x);
+  top: 14%;
+  border: 2px solid rgba(31, 41, 55, 0.24);
+  border-radius: 999px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.8), rgba(255, 244, 202, 0.85) 48%, rgba(31, 41, 55, 0.12));
+  opacity: 0;
+  transform: translateX(-50%) rotate(-11deg) scaleY(0.68);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+  animation: cut-face-show 390ms ease-out forwards;
+}
+
+.fruit-banana .cut-face,
+.fruit-watermelon .cut-face {
+  height: calc(var(--fruit-size) * 0.48);
+  top: 24%;
 }
 
 .fruit-apple .fruit-shape {
@@ -362,6 +438,10 @@ button {
   transform: rotate(14deg);
 }
 
+.fruit-apple.is-cut .fruit-half-right::before {
+  display: none;
+}
+
 .fruit-orange .fruit-shape {
   background:
     radial-gradient(circle at 31% 24%, rgba(255, 255, 255, 0.75) 0 12%, transparent 13%),
@@ -372,7 +452,11 @@ button {
 .fruit-lemon .fruit-shape,
 .fruit-lime .fruit-shape {
   border-radius: 64% 36% 64% 36%;
-  transform: rotate(-22deg);
+}
+
+.fruit-lemon,
+.fruit-lime {
+  --shape-tilt: -22deg;
 }
 
 .fruit-lemon .fruit-shape {
@@ -407,21 +491,27 @@ button {
   width: calc(var(--fruit-size) * 0.92);
   height: calc(var(--fruit-size) * 0.54);
   border-radius: 62% 38% 58% 42%;
-  transform: rotate(-20deg);
   background:
     radial-gradient(circle at 22% 26%, rgba(255, 255, 255, 0.65) 0 12%, transparent 13%),
     linear-gradient(180deg, #ffe76b 0 55%, #e2a91f 56% 100%);
+}
+
+.fruit-banana {
+  --shape-tilt: -20deg;
 }
 
 .fruit-watermelon .fruit-shape {
   width: calc(var(--fruit-size) * 0.92);
   height: calc(var(--fruit-size) * 0.62);
   border-radius: 12px 12px 999px 999px;
-  transform: rotate(7deg);
   background:
     radial-gradient(circle at 34% 44%, #2d1f24 0 4%, transparent 5%),
     radial-gradient(circle at 58% 52%, #2d1f24 0 4%, transparent 5%),
     linear-gradient(180deg, #ff6b75 0 63%, #e8fff1 64% 74%, #27945f 75% 100%);
+}
+
+.fruit-watermelon {
+  --shape-tilt: 7deg;
 }
 
 .fruit-rambutan .fruit-shape {
@@ -452,7 +542,7 @@ button {
 }
 
 .fruit-sprite.is-cut {
-  animation: fruit-pop 190ms ease-out forwards;
+  filter: drop-shadow(0 14px 0 rgba(31, 41, 55, 0.14));
 }
 
 .fruit-sprite.is-cut .slice-mark {
@@ -601,16 +691,32 @@ button {
 
 @keyframes knife-stick {
   0% {
-    transform: translateX(-50%) translateY(0) rotate(0);
+    transform: translateX(-50%) translateY(clamp(118px, 19vh, 164px)) rotate(0);
   }
-  34% {
-    transform: translateX(-50%) translateY(clamp(126px, 20vh, 174px)) rotate(0);
+  36% {
+    transform: translateX(-50%) translateY(clamp(126px, 20vh, 174px)) rotate(-4deg);
   }
-  54% {
+  64% {
     transform: translateX(-50%) translateY(clamp(118px, 19vh, 164px)) rotate(-8deg);
   }
   100% {
     transform: translateX(-50%) translateY(clamp(118px, 19vh, 164px)) rotate(-8deg);
+  }
+}
+
+@keyframes belt-slit-appear {
+  0%,
+  8% {
+    opacity: 0;
+    transform: translateX(-50%) scaleX(0.42);
+  }
+  18% {
+    opacity: 1;
+    transform: translateX(-50%) scaleX(1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) scaleX(0.82);
   }
 }
 
@@ -622,6 +728,45 @@ button {
   100% {
     transform: scale(1.35) rotate(-10deg);
     opacity: 0;
+  }
+}
+
+@keyframes split-left {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--shape-tilt)) translate3d(0, 0, 0) rotateY(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--shape-tilt)) translate3d(-18px, 7px, 18px) rotateY(-18deg)
+      rotateZ(-5deg);
+  }
+}
+
+@keyframes split-right {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--shape-tilt)) translate3d(0, 0, 0) rotateY(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--shape-tilt)) translate3d(20px, -3px, 22px) rotateY(20deg)
+      rotateZ(4deg);
+  }
+}
+
+@keyframes cut-face-show {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) rotate(-11deg) scaleY(0.42);
+  }
+  24% {
+    opacity: 0.95;
+    transform: translateX(-50%) rotate(-11deg) scaleY(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) rotate(-11deg) scaleY(0.9) translateY(3px);
   }
 }
 

@@ -23,6 +23,7 @@ type Fruit = {
   size: number;
   speed: number;
   cut: boolean;
+  cutPercent: number;
 };
 
 type FloatingPoint = {
@@ -72,6 +73,7 @@ const createFruit = (beltHeight: number, elapsedSeconds: number): Fruit => {
     size,
     speed,
     cut: false,
+    cutPercent: 50,
   };
 };
 
@@ -86,17 +88,28 @@ const loadHighScore = () => {
 };
 
 function FruitSprite({ fruit }: { fruit: Fruit }) {
+  const cutPercent = Math.min(78, Math.max(22, fruit.cutPercent));
+
   return (
     <div
       className={`fruit-sprite fruit-${fruit.type}${fruit.cut ? " is-cut" : ""}`}
       style={{
         "--fruit-size": `${fruit.size}px`,
+        "--cut-x": `${cutPercent}%`,
         left: `${fruit.x}px`,
         top: `${fruit.y}px`,
       } as React.CSSProperties}
       aria-hidden="true"
     >
-      <span className="fruit-shape" />
+      {fruit.cut ? (
+        <>
+          <span className="fruit-shape fruit-half fruit-half-left" />
+          <span className="fruit-shape fruit-half fruit-half-right" />
+          <span className="cut-face" />
+        </>
+      ) : (
+        <span className="fruit-shape fruit-whole" />
+      )}
       <span className="slice-mark" aria-hidden="true" />
     </div>
   );
@@ -146,6 +159,7 @@ export function FruitCutterGame() {
   const gameStateRef = useRef<GameState>("idle");
   const beltSizeRef = useRef({ width: 900, height: 190 });
   const knifeDroppingRef = useRef(false);
+  const knifeMissRef = useRef(false);
   const pendingTimerRefs = useRef<number[]>([]);
 
   const [gameState, setGameState] = useState<GameState>("idle");
@@ -294,6 +308,7 @@ export function FruitCutterGame() {
     setFloatingPoints([]);
     setKnifeState("ready");
     knifeDroppingRef.current = false;
+    knifeMissRef.current = false;
     setFruits([starterFruit]);
     setGameState("playing");
     gameStateRef.current = "playing";
@@ -305,26 +320,28 @@ export function FruitCutterGame() {
     timerRef.current = window.setInterval(tickGame, 16);
   }, [clearPendingTimers, tickGame]);
 
-  const cutFruit = useCallback((fruit: Fruit) => {
+  const cutFruit = useCallback((fruit: Fruit, cutX: number) => {
     if (gameStateRef.current !== "playing" || fruit.cut) {
       return;
     }
 
+    const cutPercent = Math.min(78, Math.max(22, (cutX / fruit.size) * 100));
+
     setScore((currentScore) => currentScore + 1);
-    setFloatingPoints((points) => [...points, { id: fruit.id, x: fruit.x + fruit.size / 2, y: fruit.y }]);
+    setFloatingPoints((points) => [...points, { id: fruit.id, x: fruit.x + cutX, y: fruit.y }]);
     setPendingTimer(() => {
       setFloatingPoints((points) => points.filter((point) => point.id !== fruit.id));
     }, 760);
 
     setFruits((currentFruits) =>
       currentFruits.map((currentFruit) =>
-        currentFruit.id === fruit.id ? { ...currentFruit, cut: true } : currentFruit,
+        currentFruit.id === fruit.id ? { ...currentFruit, cut: true, cutPercent } : currentFruit,
       ),
     );
 
     setPendingTimer(() => {
       setFruits((currentFruits) => currentFruits.filter((currentFruit) => currentFruit.id !== fruit.id));
-    }, 190);
+    }, 520);
 
     setPendingTimer(() => {
       if (gameStateRef.current !== "playing") {
@@ -346,37 +363,48 @@ export function FruitCutterGame() {
     }
 
     knifeDroppingRef.current = true;
+    knifeMissRef.current = false;
     setKnifeState("dropping");
 
-    const knifeX = beltSizeRef.current.width / 2;
-    const hittableFruit = fruitsRef.current
-      .filter((fruit) => !fruit.cut)
-      .map((fruit) => {
-        const fruitCenter = fruit.x + fruit.size / 2;
-        const hitHalfWidth = fruit.size * fruitSettings[fruit.type].hitScale * 0.5;
-        return {
-          fruit,
-          distance: Math.abs(fruitCenter - knifeX),
-          hitHalfWidth,
-        };
-      })
-      .filter(({ distance, hitHalfWidth }) => distance <= hitHalfWidth)
-      .sort((first, second) => first.distance - second.distance)[0]?.fruit;
+    setPendingTimer(() => {
+      const knifeX = beltSizeRef.current.width / 2;
+      const hittableFruit = fruitsRef.current
+        .filter((fruit) => !fruit.cut)
+        .map((fruit) => {
+          const fruitCenter = fruit.x + fruit.size / 2;
+          const cutX = knifeX - fruit.x;
+          const hitHalfWidth = fruit.size * fruitSettings[fruit.type].hitScale * 0.5;
+          return {
+            fruit,
+            cutX,
+            distance: Math.abs(fruitCenter - knifeX),
+            hitHalfWidth,
+          };
+        })
+        .filter(({ cutX, distance, fruit, hitHalfWidth }) => cutX >= 0 && cutX <= fruit.size && distance <= hitHalfWidth)
+        .sort((first, second) => first.distance - second.distance)[0];
 
-    if (hittableFruit) {
-      setPendingTimer(() => cutFruit(hittableFruit), 135);
+      if (hittableFruit) {
+        cutFruit(hittableFruit.fruit, hittableFruit.cutX);
+        return;
+      }
+
+      setKnifeState("stuck");
+      knifeMissRef.current = true;
       setPendingTimer(() => {
         knifeDroppingRef.current = false;
-        setKnifeState("ready");
-      }, 430);
-      return;
-    }
+        endGame();
+      }, 650);
+    }, 190);
 
-    setKnifeState("stuck");
     setPendingTimer(() => {
+      if (gameStateRef.current !== "playing" || knifeMissRef.current) {
+        return;
+      }
+
       knifeDroppingRef.current = false;
-      endGame();
-    }, 780);
+      setKnifeState("ready");
+    }, 430);
   }, [cutFruit, endGame, setPendingTimer]);
 
   useEffect(
@@ -437,6 +465,7 @@ export function FruitCutterGame() {
           <div className={`knife-rig is-${knifeState}`} aria-hidden="true">
             <span className="knife-handle" />
             <span className="knife-blade" />
+            <span className="knife-belt-slit" />
           </div>
 
           <div className="machine-top" aria-hidden="true">
