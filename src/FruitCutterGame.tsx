@@ -311,6 +311,7 @@ function GameOverModal({
 
 export function FruitCutterGame() {
   const gameFrameRef = useRef<HTMLElement | null>(null);
+  const factorySceneRef = useRef<HTMLDivElement | null>(null);
   const beltRef = useRef<HTMLDivElement | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const timerRef = useRef<number | null>(null);
@@ -339,6 +340,7 @@ export function FruitCutterGame() {
   const [beltSize, setBeltSize] = useState({ width: 900, height: 190 });
   const [knifeState, setKnifeState] = useState<KnifeState>("ready");
   const [isImmersiveMode, setIsImmersiveMode] = useState(false);
+  const [knifeLineX, setKnifeLineX] = useState<number | null>(null);
 
   useEffect(() => {
     fruitsRef.current = fruits;
@@ -358,21 +360,31 @@ export function FruitCutterGame() {
 
   useLayoutEffect(() => {
     const belt = beltRef.current;
-    if (!belt) {
+    const scene = factorySceneRef.current;
+    if (!belt || !scene) {
       return undefined;
     }
 
-    const updateSize = () => {
+    const updateMetrics = () => {
       const nextBeltSize = { width: belt.clientWidth, height: belt.clientHeight };
       beltSizeRef.current = nextBeltSize;
       setBeltSize(nextBeltSize);
+
+      const beltRect = belt.getBoundingClientRect();
+      const sceneRect = scene.getBoundingClientRect();
+      setKnifeLineX(beltRect.left + beltRect.width / 2 - sceneRect.left);
     };
 
-    updateSize();
-    const observer = new ResizeObserver(updateSize);
+    updateMetrics();
+    const observer = new ResizeObserver(updateMetrics);
     observer.observe(belt);
+    observer.observe(scene);
+    window.addEventListener("resize", updateMetrics);
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateMetrics);
+    };
   }, []);
 
   const clearPendingTimers = useCallback(() => {
@@ -937,10 +949,15 @@ export function FruitCutterGame() {
               dropKnife();
             }
           }}
+          ref={factorySceneRef}
           role="button"
           tabIndex={gameState === "playing" ? 0 : -1}
         >
-          <div className={`knife-rig is-${knifeState} knife-${currentKnifeMode}`} aria-hidden="true">
+          <div
+            className={`knife-rig is-${knifeState} knife-${currentKnifeMode}`}
+            style={knifeLineX === null ? undefined : ({ left: `${knifeLineX}px` } as React.CSSProperties)}
+            aria-hidden="true"
+          >
             <span className="knife-handle" />
             <span className="knife-blade" />
             <span className="knife-belt-slit" />
