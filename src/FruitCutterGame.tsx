@@ -74,6 +74,15 @@ type FloatingPoint = {
   y: number;
 };
 
+type CutScrap = {
+  id: number;
+  type: FruitType;
+  x: number;
+  size: number;
+  rotation: number;
+  settleY: number;
+};
+
 const fruitTypes: FruitType[] = [
   "apple",
   "orange",
@@ -208,6 +217,23 @@ function FruitSprite({ fruit }: { fruit: Fruit }) {
   );
 }
 
+function CutScrapPiece({ scrap }: { scrap: CutScrap }) {
+  return (
+    <span
+      aria-hidden="true"
+      className={`cut-scrap scrap-${scrap.type}`}
+      style={{
+        "--scrap-size": `${scrap.size}px`,
+        "--scrap-rotation": `${scrap.rotation}deg`,
+        "--scrap-settle-y": `${scrap.settleY}px`,
+        left: `${scrap.x}px`,
+      } as React.CSSProperties}
+    >
+      <span className="scrap-shape" />
+    </span>
+  );
+}
+
 function GameOverModal({
   finalScore,
   highScore,
@@ -263,6 +289,7 @@ export function FruitCutterGame() {
   const [highScore, setHighScore] = useState(loadHighScore);
   const [fruits, setFruits] = useState<Fruit[]>([]);
   const [floatingPoints, setFloatingPoints] = useState<FloatingPoint[]>([]);
+  const [cutScraps, setCutScraps] = useState<CutScrap[]>([]);
   const [activeEffects, setActiveEffects] = useState<ActiveEffects>(EMPTY_EFFECTS);
   const [effectNow, setEffectNow] = useState(0);
   const [effectPopup, setEffectPopup] = useState<EffectPopup | null>(null);
@@ -556,6 +583,7 @@ export function FruitCutterGame() {
     activeEffectsRef.current = EMPTY_EFFECTS;
     setScore(0);
     setFloatingPoints([]);
+    setCutScraps([]);
     setActiveEffects(EMPTY_EFFECTS);
     setEffectNow(performance.now());
     setEffectPopup(null);
@@ -597,6 +625,18 @@ export function FruitCutterGame() {
     }
 
     setScore((currentScore) => currentScore + scoreDelta);
+    setCutScraps((scraps) => {
+      const scrapSize = Math.max(18, Math.min(42, fruit.size * 0.38));
+      const nextScrap: CutScrap = {
+        id: fruit.id,
+        type: fruit.type,
+        x: 34 + fruit.x + cutX,
+        size: scrapSize,
+        rotation: randomBetween(-28, 28),
+        settleY: randomBetween(12, 42),
+      };
+      return [...scraps.slice(-31), nextScrap];
+    });
     setFloatingPoints((points) => [...points, { id: fruit.id, x: fruit.x + cutX, y: fruit.y, value: scoreDelta }]);
     setPendingTimer(() => {
       setFloatingPoints((points) => points.filter((point) => point.id !== fruit.id));
@@ -832,6 +872,11 @@ export function FruitCutterGame() {
               ))}
             </div>
             <div className="belt-end belt-end-right" aria-hidden="true" />
+            <div className="cut-scrap-layer" aria-hidden="true">
+              {cutScraps.map((scrap) => (
+                <CutScrapPiece key={scrap.id} scrap={scrap} />
+              ))}
+            </div>
           </div>
 
           <div className="table-legs" aria-hidden="true">

@@ -427,6 +427,7 @@ button {
 }
 
 .belt-wrap {
+  position: relative;
   display: grid;
   grid-template-columns: 34px minmax(0, 1fr) 34px;
   align-items: stretch;
@@ -500,6 +501,113 @@ button {
 
 .belt-end-right {
   border-radius: 0 8px 8px 0;
+}
+
+.cut-scrap-layer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% - 16px);
+  height: 92px;
+  z-index: 1;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.cut-scrap {
+  --scrap-size: 28px;
+  --scrap-rotation: 0deg;
+  --scrap-settle-y: 24px;
+  width: var(--scrap-size);
+  height: calc(var(--scrap-size) * 0.72);
+  position: absolute;
+  top: 0;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transform-origin: center;
+  filter: drop-shadow(0 9px 0 rgba(31, 41, 55, 0.18));
+  animation: scrap-drop 620ms cubic-bezier(0.18, 0.78, 0.28, 1) forwards;
+}
+
+.scrap-shape {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border: 3px solid rgba(31, 41, 55, 0.72);
+  border-radius: 999px 24px 999px 30px;
+  background:
+    radial-gradient(circle at 30% 28%, rgba(255, 255, 255, 0.64) 0 14%, transparent 15%),
+    linear-gradient(145deg, var(--scrap-main, #ef4444), var(--scrap-dark, #b91c1c));
+  box-shadow:
+    inset -5px -7px 0 rgba(0, 0, 0, 0.18),
+    inset 4px 4px 0 rgba(255, 255, 255, 0.18);
+}
+
+.scrap-apple {
+  --scrap-main: #ef4444;
+  --scrap-dark: #b91c1c;
+}
+
+.scrap-orange {
+  --scrap-main: #fb923c;
+  --scrap-dark: #c2410c;
+}
+
+.scrap-grapes {
+  --scrap-main: #8b5cf6;
+  --scrap-dark: #5b21b6;
+}
+
+.scrap-banana {
+  --scrap-main: #fde047;
+  --scrap-dark: #ca8a04;
+}
+
+.scrap-banana .scrap-shape {
+  height: 62%;
+  border-radius: 999px 30px;
+}
+
+.scrap-watermelon {
+  --scrap-main: #fb7185;
+  --scrap-dark: #15803d;
+}
+
+.scrap-rambutan {
+  --scrap-main: #f43f5e;
+  --scrap-dark: #be123c;
+}
+
+.scrap-lemon {
+  --scrap-main: #fde047;
+  --scrap-dark: #eab308;
+}
+
+.scrap-lime {
+  --scrap-main: #84cc16;
+  --scrap-dark: #4d7c0f;
+}
+
+.scrap-celery {
+  --scrap-main: #a3e635;
+  --scrap-dark: #15803d;
+  width: calc(var(--scrap-size) * 0.42);
+  height: calc(var(--scrap-size) * 1.15);
+}
+
+.scrap-celery .scrap-shape {
+  border-radius: 999px 999px 12px 12px;
+}
+
+.scrap-starfruit {
+  --scrap-main: #fde047;
+  --scrap-dark: #d97706;
+}
+
+.scrap-starfruit .scrap-shape {
+  border-color: #9f7417;
+  clip-path: polygon(50% 0, 62% 31%, 96% 18%, 75% 50%, 96% 82%, 62% 69%, 50% 100%, 38% 69%, 4% 82%, 25% 50%, 4% 18%, 38% 31%);
 }
 
 .table-legs {
@@ -1070,6 +1178,24 @@ button {
     opacity: 0;
     transform: translate(-50%, -50%) rotate(var(--shape-tilt)) translate3d(20px, -3px, 22px) rotateY(20deg)
       rotateZ(4deg);
+  }
+}
+
+@keyframes scrap-drop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -120px) rotate(calc(var(--scrap-rotation) - 26deg)) scale(0.78);
+  }
+  18% {
+    opacity: 1;
+  }
+  72% {
+    opacity: 1;
+    transform: translate(-50%, calc(var(--scrap-settle-y) + 7px)) rotate(calc(var(--scrap-rotation) + 7deg)) scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, var(--scrap-settle-y)) rotate(var(--scrap-rotation)) scale(1);
   }
 }
 
