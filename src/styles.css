@@ -213,6 +213,7 @@ button {
 
 .game-frame.is-immersive,
 .game-frame:fullscreen {
+  --mobile-play-belt-offset: clamp(30px, 9vh, 44px);
   width: 100vw;
   height: 100vh;
   height: 100dvh;
@@ -290,6 +291,24 @@ button {
   min-height: 0;
   padding-top: 0;
   transform: none;
+}
+
+.game-frame.is-immersive .factory-scene .machine-top,
+.game-frame.is-immersive .factory-scene .belt-wrap,
+.game-frame.is-immersive .factory-scene .table-legs,
+.game-frame:fullscreen .factory-scene .machine-top,
+.game-frame:fullscreen .factory-scene .belt-wrap,
+.game-frame:fullscreen .factory-scene .table-legs {
+  transition: transform 160ms ease;
+}
+
+.game-frame.is-immersive .factory-scene.is-playing .machine-top,
+.game-frame.is-immersive .factory-scene.is-playing .belt-wrap,
+.game-frame.is-immersive .factory-scene.is-playing .table-legs,
+.game-frame:fullscreen .factory-scene.is-playing .machine-top,
+.game-frame:fullscreen .factory-scene.is-playing .belt-wrap,
+.game-frame:fullscreen .factory-scene.is-playing .table-legs {
+  transform: translateY(var(--mobile-play-belt-offset));
 }
 
 .game-frame.is-immersive .knife-rig,
