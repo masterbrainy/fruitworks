@@ -220,12 +220,12 @@ button {
   max-height: none;
   border-width: 0;
   border-radius: 0;
-  gap: 6px;
+  gap: 3px;
   padding:
-    max(6px, env(safe-area-inset-top))
-    max(8px, env(safe-area-inset-right))
-    max(6px, env(safe-area-inset-bottom))
-    max(8px, env(safe-area-inset-left));
+    max(3px, env(safe-area-inset-top))
+    max(4px, env(safe-area-inset-right))
+    max(3px, env(safe-area-inset-bottom))
+    max(4px, env(safe-area-inset-left));
   box-shadow: none;
 }
 
@@ -233,35 +233,35 @@ button {
 .game-frame:fullscreen .scorebar {
   align-items: center;
   flex-direction: row;
-  gap: 8px;
-  padding-right: 112px;
+  gap: 5px;
+  padding-right: 82px;
 }
 
 .game-frame.is-immersive .brand-block,
 .game-frame:fullscreen .brand-block {
-  gap: 7px;
+  gap: 5px;
 }
 
 .game-frame.is-immersive .brand-mark,
 .game-frame:fullscreen .brand-mark {
-  width: 32px;
-  height: 32px;
-  border-width: 3px;
-  font-size: 1.05rem;
+  width: 24px;
+  height: 24px;
+  border-width: 2px;
+  font-size: 0.78rem;
 }
 
 .game-frame.is-immersive .brand-block p,
 .game-frame:fullscreen .brand-block p {
   display: block;
   margin: 0;
-  font-size: 0.58rem;
+  font-size: 0.46rem;
   line-height: 1;
 }
 
 .game-frame.is-immersive .brand-block h1,
 .game-frame:fullscreen .brand-block h1 {
   max-width: none;
-  font-size: clamp(0.94rem, 2.7vw, 1.25rem);
+  font-size: clamp(0.72rem, 2.2vw, 0.95rem);
   line-height: 1;
 }
 
@@ -269,24 +269,24 @@ button {
 .game-frame:fullscreen .score-cluster {
   display: flex;
   flex-wrap: nowrap;
-  gap: 6px;
+  gap: 4px;
 }
 
 .game-frame.is-immersive .score-pill,
 .game-frame:fullscreen .score-pill {
-  min-width: 70px;
-  padding: 4px 8px;
+  min-width: 50px;
+  padding: 2px 5px;
   border-width: 2px;
 }
 
 .game-frame.is-immersive .score-pill span,
 .game-frame:fullscreen .score-pill span {
-  font-size: 0.66rem;
+  font-size: 0.48rem;
 }
 
 .game-frame.is-immersive .score-pill strong,
 .game-frame:fullscreen .score-pill strong {
-  font-size: clamp(1.15rem, 4vh, 1.65rem);
+  font-size: clamp(0.88rem, 3vh, 1.15rem);
 }
 
 .game-frame.is-immersive .factory-scene,
@@ -298,52 +298,91 @@ button {
 
 .game-frame.is-immersive .knife-rig,
 .game-frame:fullscreen .knife-rig {
-  --knife-impact-y: clamp(70px, 20vh, 92px);
-  --knife-bury-y: clamp(80px, 22vh, 102px);
-  top: clamp(-64px, -13vh, -40px);
+  --knife-impact-y: clamp(80px, 24vh, 96px);
+  --knife-bury-y: clamp(88px, 26vh, 104px);
+  width: 42px;
+  height: 118px;
+  top: clamp(-42px, -10vh, -24px);
+}
+
+.game-frame.is-immersive .knife-handle,
+.game-frame:fullscreen .knife-handle {
+  width: 22px;
+  height: 46px;
+  border-width: 3px;
+}
+
+.game-frame.is-immersive .knife-blade,
+.game-frame:fullscreen .knife-blade {
+  width: 34px;
+  height: 68px;
+  border-width: 3px;
+  border-top-width: 2px;
+}
+
+.game-frame.is-immersive .knife-rig.knife-wide,
+.game-frame:fullscreen .knife-rig.knife-wide {
+  width: 58px;
+}
+
+.game-frame.is-immersive .knife-rig.knife-wide .knife-blade,
+.game-frame:fullscreen .knife-rig.knife-wide .knife-blade {
+  width: 50px;
+  height: 72px;
+}
+
+.game-frame.is-immersive .knife-rig.knife-skinny,
+.game-frame:fullscreen .knife-rig.knife-skinny {
+  width: 28px;
+}
+
+.game-frame.is-immersive .knife-rig.knife-skinny .knife-blade,
+.game-frame:fullscreen .knife-rig.knife-skinny .knife-blade {
+  width: 18px;
 }
 
 .game-frame.is-immersive .machine-top,
 .game-frame:fullscreen .machine-top {
-  width: min(62%, 520px);
-  height: 32px;
-  margin-bottom: -4px;
-  padding: 6px 14px;
+  width: min(56%, 420px);
+  height: 24px;
+  margin-bottom: -3px;
+  padding: 4px 10px;
+  border-width: 3px;
 }
 
 .game-frame.is-immersive .machine-top span,
 .game-frame:fullscreen .machine-top span {
-  height: 9px;
+  height: 6px;
 }
 
 .game-frame.is-immersive .belt-wrap,
 .game-frame:fullscreen .belt-wrap {
-  grid-template-columns: 24px minmax(0, 1fr) 24px;
-  min-height: clamp(102px, 32vh, 130px);
+  grid-template-columns: 18px minmax(0, 1fr) 18px;
+  min-height: clamp(74px, 25vh, 96px);
 }
 
 .game-frame.is-immersive .fruit-layer,
 .game-frame:fullscreen .fruit-layer {
-  left: 24px;
-  right: 24px;
+  left: 18px;
+  right: 18px;
 }
 
 .game-frame.is-immersive .conveyor-belt,
 .game-frame:fullscreen .conveyor-belt {
-  height: clamp(102px, 32vh, 130px);
-  border-width: 5px;
-  border-bottom-width: 10px;
+  height: clamp(74px, 25vh, 96px);
+  border-width: 4px;
+  border-bottom-width: 8px;
 }
 
 .game-frame.is-immersive .cut-scrap-layer,
 .game-frame:fullscreen .cut-scrap-layer {
-  top: calc(100% - 12px);
-  height: 58px;
+  top: calc(100% - 8px);
+  height: 42px;
 }
 
 .game-frame.is-immersive .table-legs span,
 .game-frame:fullscreen .table-legs span {
-  height: clamp(16px, 5vh, 30px);
+  height: clamp(10px, 3.5vh, 20px);
 }
 
 .scorebar {
@@ -1608,72 +1647,224 @@ button {
   }
 
   .scorebar {
-    padding-right: 112px;
+    padding-right: 82px;
   }
 }
 
-@media (orientation: landscape) and (max-height: 560px) {
+@media (pointer: coarse), (max-width: 960px), (max-height: 560px) {
+  .fullscreen-action {
+    min-height: 30px;
+    gap: 5px;
+    padding: 4px 7px;
+    border-width: 2px;
+    font-size: 0.68rem;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 960px) {
   .app-shell {
-    padding: 6px;
+    width: 100dvh;
+    height: 100dvw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    padding: 3px;
+    transform: rotate(90deg) translateY(-100%);
+    transform-origin: top left;
   }
 
   .game-frame {
-    height: calc(100vh - 12px);
-    height: calc(100dvh - 12px);
-    max-height: calc(100vh - 12px);
-    max-height: calc(100dvh - 12px);
-    gap: 6px;
-    padding: 8px 10px;
+    width: calc(100dvh - 6px);
+    height: calc(100dvw - 6px);
+    max-height: calc(100dvw - 6px);
   }
 
-  .scorebar {
+  .game-frame .scorebar {
     align-items: center;
     flex-direction: row;
-    gap: 8px;
+  }
+
+  .game-frame {
+    gap: 3px;
+    padding: 4px 5px;
   }
 
   .brand-block {
-    gap: 7px;
+    gap: 5px;
   }
 
   .brand-mark {
-    width: 32px;
-    height: 32px;
-    border-width: 3px;
-    font-size: 1.05rem;
+    width: 24px;
+    height: 24px;
+    border-width: 2px;
+    font-size: 0.78rem;
   }
 
   .brand-block p,
   .mini-label {
     margin: 0;
-    font-size: 0.58rem;
+    font-size: 0.46rem;
     line-height: 1;
   }
 
   .brand-block h1 {
     max-width: none;
-    font-size: clamp(0.94rem, 2.7vw, 1.25rem);
+    font-size: clamp(0.72rem, 2.2vw, 0.95rem);
     line-height: 1;
   }
 
   .score-cluster {
     display: flex;
     flex-wrap: nowrap;
-    gap: 6px;
+    gap: 4px;
   }
 
   .score-pill {
-    min-width: 70px;
-    padding: 4px 8px;
+    min-width: 50px;
+    padding: 2px 5px;
     border-width: 2px;
   }
 
   .score-pill span {
-    font-size: 0.66rem;
+    font-size: 0.48rem;
   }
 
   .score-pill strong {
-    font-size: clamp(1.15rem, 4vh, 1.65rem);
+    font-size: clamp(0.88rem, 3vh, 1.15rem);
+  }
+
+  .factory-scene {
+    min-height: 0;
+    padding-top: 0;
+    transform: none;
+  }
+
+  .knife-rig {
+    --knife-impact-y: clamp(80px, 24vh, 96px);
+    --knife-bury-y: clamp(88px, 26vh, 104px);
+    width: 42px;
+    height: 118px;
+    top: clamp(-42px, -10vh, -24px);
+  }
+
+  .knife-handle {
+    width: 22px;
+    height: 46px;
+    border-width: 3px;
+  }
+
+  .knife-blade {
+    width: 34px;
+    height: 68px;
+    border-width: 3px;
+    border-top-width: 2px;
+  }
+
+  .machine-top {
+    width: min(56%, 420px);
+    height: 24px;
+    margin-bottom: -3px;
+    padding: 4px 10px;
+    border-width: 3px;
+  }
+
+  .machine-top span {
+    height: 6px;
+  }
+
+  .belt-wrap {
+    grid-template-columns: 18px minmax(0, 1fr) 18px;
+    min-height: clamp(74px, 25vh, 96px);
+  }
+
+  .fruit-layer {
+    left: 18px;
+    right: 18px;
+  }
+
+  .conveyor-belt {
+    height: clamp(74px, 25vh, 96px);
+    border-width: 4px;
+    border-bottom-width: 8px;
+  }
+
+  .belt-end {
+    border-width: 4px;
+    box-shadow: 0 10px 0 #26313f;
+  }
+
+  .cut-scrap-layer {
+    top: calc(100% - 8px);
+    height: 42px;
+  }
+
+  .table-legs span {
+    height: clamp(10px, 3.5vh, 20px);
+  }
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  .app-shell {
+    padding: 3px;
+  }
+
+  .game-frame {
+    height: calc(100vh - 6px);
+    height: calc(100dvh - 6px);
+    max-height: calc(100vh - 6px);
+    max-height: calc(100dvh - 6px);
+    gap: 3px;
+    padding: 4px 5px;
+  }
+
+  .scorebar {
+    align-items: center;
+    flex-direction: row;
+    gap: 5px;
+  }
+
+  .brand-block {
+    gap: 5px;
+  }
+
+  .brand-mark {
+    width: 24px;
+    height: 24px;
+    border-width: 2px;
+    font-size: 0.78rem;
+  }
+
+  .brand-block p,
+  .mini-label {
+    margin: 0;
+    font-size: 0.46rem;
+    line-height: 1;
+  }
+
+  .brand-block h1 {
+    max-width: none;
+    font-size: clamp(0.72rem, 2.2vw, 0.95rem);
+    line-height: 1;
+  }
+
+  .score-cluster {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 4px;
+  }
+
+  .score-pill {
+    min-width: 50px;
+    padding: 2px 5px;
+    border-width: 2px;
+  }
+
+  .score-pill span {
+    font-size: 0.48rem;
+  }
+
+  .score-pill strong {
+    font-size: clamp(0.88rem, 3vh, 1.15rem);
   }
 
   .effect-status-panel {
@@ -1683,9 +1874,9 @@ button {
   }
 
   .effect-badge {
-    min-width: 112px;
-    gap: 8px;
-    padding: 5px 7px;
+    min-width: 92px;
+    gap: 5px;
+    padding: 3px 5px;
     border-width: 2px;
   }
 
@@ -1714,46 +1905,79 @@ button {
   }
 
   .knife-rig {
-    --knife-impact-y: clamp(70px, 20vh, 92px);
-    --knife-bury-y: clamp(80px, 22vh, 102px);
-    top: clamp(-64px, -13vh, -40px);
+    --knife-impact-y: clamp(80px, 24vh, 96px);
+    --knife-bury-y: clamp(88px, 26vh, 104px);
+    width: 42px;
+    height: 118px;
+    top: clamp(-42px, -10vh, -24px);
+  }
+
+  .knife-handle {
+    width: 22px;
+    height: 46px;
+    border-width: 3px;
+  }
+
+  .knife-blade {
+    width: 34px;
+    height: 68px;
+    border-width: 3px;
+    border-top-width: 2px;
+  }
+
+  .knife-rig.knife-wide {
+    width: 58px;
+  }
+
+  .knife-rig.knife-wide .knife-blade {
+    width: 50px;
+    height: 72px;
+  }
+
+  .knife-rig.knife-skinny {
+    width: 28px;
+  }
+
+  .knife-rig.knife-skinny .knife-blade {
+    width: 18px;
   }
 
   .machine-top {
-    width: min(62%, 520px);
-    height: 32px;
-    margin-bottom: -4px;
-    padding: 6px 14px;
+    width: min(56%, 420px);
+    height: 24px;
+    margin-bottom: -3px;
+    padding: 4px 10px;
+    border-width: 3px;
   }
 
   .machine-top span {
-    height: 9px;
+    height: 6px;
   }
 
   .belt-wrap {
-    grid-template-columns: 24px minmax(0, 1fr) 24px;
-    min-height: clamp(102px, 32vh, 130px);
+    grid-template-columns: 18px minmax(0, 1fr) 18px;
+    min-height: clamp(74px, 25vh, 96px);
   }
 
   .fruit-layer {
-    left: 24px;
-    right: 24px;
+    left: 18px;
+    right: 18px;
   }
 
   .conveyor-belt {
-    height: clamp(102px, 32vh, 130px);
-    border-width: 5px;
-    border-bottom-width: 10px;
+    height: clamp(74px, 25vh, 96px);
+    border-width: 4px;
+    border-bottom-width: 8px;
   }
 
   .belt-end {
-    border-width: 5px;
-    box-shadow: 0 14px 0 #26313f;
+    border-width: 4px;
+    box-shadow: 0 10px 0 #26313f;
   }
 
   .cut-scrap-layer {
-    top: calc(100% - 12px);
-    height: 58px;
+    top: calc(100% - 8px);
+    height: 42px;
   }
 
   .table-legs {
@@ -1761,7 +1985,7 @@ button {
   }
 
   .table-legs span {
-    height: clamp(16px, 5vh, 30px);
+    height: clamp(10px, 3.5vh, 20px);
   }
 
   .start-panel {

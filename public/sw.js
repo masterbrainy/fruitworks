@@ -1,22 +1,15 @@
-const CACHE_NAME = "fruitworks-v1";
+const CACHE_NAME = "fruitworks-v4";
 const BASE_URL = new URL(self.registration.scope).pathname;
+const PRECACHE_URLS = [
+  `${BASE_URL}manifest.webmanifest`,
+  `${BASE_URL}fruitworks-icon.svg`,
+  `${BASE_URL}fruitworks-icon-192.png`,
+  `${BASE_URL}fruitworks-icon-512.png`,
+  `${BASE_URL}apple-touch-icon.png`,
+];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches
-      .open(CACHE_NAME)
-      .then((cache) =>
-        cache.addAll([
-          BASE_URL,
-          `${BASE_URL}manifest.webmanifest`,
-          `${BASE_URL}fruitworks-icon.svg`,
-          `${BASE_URL}fruitworks-icon-192.png`,
-          `${BASE_URL}fruitworks-icon-512.png`,
-          `${BASE_URL}apple-touch-icon.png`,
-        ]),
-      )
-      .then(() => self.skipWaiting()),
-  );
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_URLS)).then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (event) => {
@@ -28,8 +21,35 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") {
+    return;
+  }
+
+  const requestUrl = new URL(event.request.url);
+  const isSameOrigin = requestUrl.origin === self.location.origin;
+  const shouldNetworkFirst =
+    event.request.mode === "navigate" ||
+    (isSameOrigin && ["document", "script", "style", "worker", "manifest"].includes(event.request.destination));
+
+  if (shouldNetworkFirst) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
+          }
+          return response;
+        })
+        .catch(() => caches.match(event.request).then((cachedResponse) => cachedResponse || caches.match(BASE_URL))),
+    );
     return;
   }
 
@@ -40,12 +60,10 @@ self.addEventListener("fetch", (event) => {
       }
 
       return fetch(event.request).then((response) => {
-        if (!response || response.status !== 200 || response.type === "opaque") {
-          return response;
+        if (response && response.status === 200 && response.type !== "opaque") {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
         }
-
-        const responseToCache = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, responseToCache));
         return response;
       });
     }),

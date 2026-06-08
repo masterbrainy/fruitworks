@@ -169,7 +169,8 @@ const createFruit = (
   const type = fruitNumber === 3 || (fruitNumber > 3 && Math.random() < 0.1) ? "starfruit" : pickFruitType();
   const settings = fruitSettings[type];
   const tinyFruitScale = activeEffects.tinyFruitUntil > now && type !== "starfruit" ? 0.62 : 1;
-  const size = randomBetween(settings.minSize, settings.maxSize) * tinyFruitScale;
+  const layoutScale = Math.min(1, Math.max(0.62, beltHeight / 170));
+  const size = randomBetween(settings.minSize, settings.maxSize) * tinyFruitScale * layoutScale;
   const laneCenter = beltHeight * 0.49;
   const y = settings.baseAnchorScale ? laneCenter - size * settings.baseAnchorScale : laneCenter - size / 2;
   const speed = Math.min(283.4, 135.2 + elapsedSeconds * 2.9 + settings.speedBias + randomBetween(-4, 9));
@@ -625,6 +626,8 @@ export function FruitCutterGame() {
   }, [endGame]);
 
   const startGame = useCallback(() => {
+    getAudioContext();
+
     if (timerRef.current) {
       window.clearInterval(timerRef.current);
     }
@@ -656,7 +659,7 @@ export function FruitCutterGame() {
     fruitsRef.current = [starterFruit];
     tickGame();
     timerRef.current = window.setInterval(tickGame, 16);
-  }, [clearPendingTimers, makeNextFruit, tickGame]);
+  }, [clearPendingTimers, getAudioContext, makeNextFruit, tickGame]);
 
   const cutFruit = useCallback((fruit: Fruit, cutX: number, impactX = fruit.x + cutX) => {
     if (gameStateRef.current !== "playing" || fruit.cut) {
@@ -736,6 +739,8 @@ export function FruitCutterGame() {
       return;
     }
 
+    getAudioContext();
+
     if (beltRef.current) {
       beltSizeRef.current = { width: beltRef.current.clientWidth, height: beltRef.current.clientHeight };
     }
@@ -801,7 +806,7 @@ export function FruitCutterGame() {
         endGame();
       }, 650);
     }, KNIFE_IMPACT_MS);
-  }, [cutFruit, endGame, playFailureSound, playSliceSound, setPendingTimer]);
+  }, [cutFruit, endGame, getAudioContext, playFailureSound, playSliceSound, setPendingTimer]);
 
   const toggleImmersiveMode = useCallback(async () => {
     const frame = gameFrameRef.current;
@@ -844,6 +849,23 @@ export function FruitCutterGame() {
 
     document.addEventListener("fullscreenchange", handleFullscreenChange);
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
+  useEffect(() => {
+    const isInstalledApp =
+      window.matchMedia("(display-mode: fullscreen)").matches ||
+      window.matchMedia("(display-mode: standalone)").matches ||
+      ("standalone" in window.navigator && Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone));
+
+    if (!isInstalledApp) {
+      return;
+    }
+
+    setIsImmersiveMode(true);
+    const orientation = screen.orientation as ScreenOrientation & {
+      lock?: (orientation: OrientationLockType) => Promise<void>;
+    };
+    void orientation.lock?.("landscape").catch(() => undefined);
   }, []);
 
   const isDoubleScoreActive = activeEffects.scoreUntil > effectNow && activeEffects.scoreMultiplier === 2;
