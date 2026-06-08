@@ -25,6 +25,7 @@ type FruitType =
   | "lemon"
   | "lime"
   | "sugarcane"
+  | "durian"
   | "starfruit";
 
 type ActiveEffects = {
@@ -42,6 +43,7 @@ type EffectPopup = {
   id: number;
   message: string;
   polarity: EffectPolarity;
+  title: string;
 };
 
 type SpecialEffect = {
@@ -114,10 +116,11 @@ const fruitSettings: Record<
   lemon: { minSize: 58, maxSize: 72, hitScale: 0.66, speedBias: 2 },
   lime: { minSize: 52, maxSize: 64, hitScale: 0.58, speedBias: 5 },
   sugarcane: { minSize: 92, maxSize: 110, hitScale: 0.78, speedBias: 3, visualWidthScale: 0.54, baseAnchorScale: 0.92 },
+  durian: { minSize: 70, maxSize: 82, hitScale: 0.7, speedBias: 1 },
   starfruit: { minSize: 72, maxSize: 84, hitScale: 0.78, speedBias: -2 },
 };
 
-const specialEffects: SpecialEffect[] = [
+const positiveSpecialEffects: SpecialEffect[] = [
   {
     apply: (now, current) => ({ ...current, scoreMultiplier: 2, scoreUntil: now + 15000 }),
     message: "x2 score for 15 seconds",
@@ -138,6 +141,9 @@ const specialEffects: SpecialEffect[] = [
     message: "freeze one fruit until cut",
     polarity: "positive",
   },
+];
+
+const negativeSpecialEffects: SpecialEffect[] = [
   {
     apply: (now, current) => ({ ...current, knifeMode: "skinny", knifeUntil: now + 15000 }),
     message: "skinny knife for 15 seconds",
@@ -159,6 +165,23 @@ const randomBetween = (min: number, max: number) => Math.random() * (max - min) 
 
 const pickFruitType = () => fruitTypes[Math.floor(Math.random() * fruitTypes.length)];
 
+const pickSpecialFruitType = (fruitNumber: number): FruitType => {
+  if (fruitNumber === 3) {
+    return "starfruit";
+  }
+
+  const specialRoll = Math.random();
+  if (fruitNumber > 3 && specialRoll < 0.1) {
+    return "starfruit";
+  }
+
+  if (fruitNumber >= 5 && specialRoll >= 0.1 && specialRoll < 0.2) {
+    return "durian";
+  }
+
+  return pickFruitType();
+};
+
 const createFruit = (
   beltHeight: number,
   elapsedSeconds: number,
@@ -166,9 +189,9 @@ const createFruit = (
   activeEffects: ActiveEffects,
   now: number,
 ): Fruit => {
-  const type = fruitNumber === 3 || (fruitNumber > 3 && Math.random() < 0.1) ? "starfruit" : pickFruitType();
+  const type = pickSpecialFruitType(fruitNumber);
   const settings = fruitSettings[type];
-  const tinyFruitScale = activeEffects.tinyFruitUntil > now && type !== "starfruit" ? 0.62 : 1;
+  const tinyFruitScale = activeEffects.tinyFruitUntil > now && type !== "starfruit" && type !== "durian" ? 0.62 : 1;
   const layoutScale = Math.min(1, Math.max(0.62, beltHeight / 170));
   const size = randomBetween(settings.minSize, settings.maxSize) * tinyFruitScale * layoutScale;
   const laneCenter = beltHeight * 0.49;
@@ -425,11 +448,17 @@ export function FruitCutterGame() {
   }, []);
 
   const triggerSpecialEffect = useCallback(
-    (now: number) => {
-      const effect = specialEffects[Math.floor(Math.random() * specialEffects.length)];
+    (now: number, fruitType: "starfruit" | "durian") => {
+      const effectPool = fruitType === "starfruit" ? positiveSpecialEffects : negativeSpecialEffects;
+      const effect = effectPool[Math.floor(Math.random() * effectPool.length)];
       updateEffects((currentEffects) => effect.apply(now, currentEffects));
       setEffectNow(now);
-      setEffectPopup({ id: now, message: effect.message, polarity: effect.polarity });
+      setEffectPopup({
+        id: now,
+        message: effect.message,
+        polarity: effect.polarity,
+        title: fruitType === "starfruit" ? "Special Starfruit Effect:" : "Special Durian Effect:",
+      });
       setPendingTimer(() => {
         setEffectPopup((currentPopup) => (currentPopup?.id === now ? null : currentPopup));
       }, 2600);
@@ -742,8 +771,8 @@ export function FruitCutterGame() {
       setFruits([nextFruit]);
     }, 380);
 
-    if (fruit.type === "starfruit") {
-      triggerSpecialEffect(now);
+    if (fruit.type === "starfruit" || fruit.type === "durian") {
+      triggerSpecialEffect(now, fruit.type);
     }
   }, [makeNextFruit, setPendingTimer, triggerSpecialEffect]);
 
@@ -900,7 +929,7 @@ export function FruitCutterGame() {
 
         {effectPopup && (
           <div className={`special-popup is-${effectPopup.polarity}`} aria-live="polite">
-            <strong>Special Starfruit Effect:</strong>
+            <strong>{effectPopup.title}</strong>
             <span>{effectPopup.message}</span>
           </div>
         )}
