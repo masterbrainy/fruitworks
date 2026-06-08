@@ -10,7 +10,7 @@ const KNIFE_COLLISION_WIDTH: Record<KnifeMode, number> = {
   skinny: 20,
 };
 
-type GameState = "idle" | "playing" | "gameOver";
+type GameState = "idle" | "playing" | "paused" | "gameOver";
 type KnifeState = "ready" | "dropping" | "hidden" | "stuck";
 type KnifeMode = "normal" | "wide" | "skinny";
 type EffectPolarity = "positive" | "negative";
@@ -373,6 +373,9 @@ export function FruitCutterGame() {
   const knifeDroppingRef = useRef(false);
   const knifeMissRef = useRef(false);
   const pendingTimerRefs = useRef<number[]>([]);
+  const countdownTimerRef = useRef<number | null>(null);
+  const orientationPausedRef = useRef(false);
+  const pausedAtRef = useRef(0);
 
   const [gameState, setGameState] = useState<GameState>("idle");
   const [score, setScore] = useState(0);
@@ -387,6 +390,7 @@ export function FruitCutterGame() {
   const [knifeState, setKnifeState] = useState<KnifeState>("ready");
   const [isImmersiveMode, setIsImmersiveMode] = useState(shouldUseMobileAppLayout);
   const [knifeLineX, setKnifeLineX] = useState<number | null>(null);
+  const [resumeCountdown, setResumeCountdown] = useState<number | null>(null);
 
   useEffect(() => {
     fruitsRef.current = fruits;
@@ -436,6 +440,13 @@ export function FruitCutterGame() {
   const clearPendingTimers = useCallback(() => {
     pendingTimerRefs.current.forEach((timer) => window.clearTimeout(timer));
     pendingTimerRefs.current = [];
+  }, []);
+
+  const clearCountdownTimer = useCallback(() => {
+    if (countdownTimerRef.current) {
+      window.clearInterval(countdownTimerRef.current);
+      countdownTimerRef.current = null;
+    }
   }, []);
 
   const setPendingTimer = useCallback((callback: () => void, delay: number) => {
@@ -676,6 +687,67 @@ export function FruitCutterGame() {
     });
   }, [endGame]);
 
+  const pauseForOrientation = useCallback(() => {
+    if (gameStateRef.current !== "playing") {
+      return;
+    }
+
+    if (timerRef.current) {
+      window.clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+
+    clearPendingTimers();
+    clearCountdownTimer();
+    orientationPausedRef.current = true;
+    pausedAtRef.current = performance.now();
+    knifeDroppingRef.current = false;
+    knifeMissRef.current = false;
+    gameStateRef.current = "paused";
+    setGameState("paused");
+    setKnifeState("ready");
+    setResumeCountdown(null);
+  }, [clearCountdownTimer, clearPendingTimers]);
+
+  const resumeFromOrientationPause = useCallback(() => {
+    if (!orientationPausedRef.current || gameStateRef.current !== "paused" || countdownTimerRef.current) {
+      return;
+    }
+
+    let nextCount = 3;
+    setResumeCountdown(nextCount);
+    countdownTimerRef.current = window.setInterval(() => {
+      nextCount -= 1;
+
+      if (nextCount > 0) {
+        setResumeCountdown(nextCount);
+        return;
+      }
+
+      clearCountdownTimer();
+      setResumeCountdown(null);
+      orientationPausedRef.current = false;
+
+      const now = performance.now();
+      if (pausedAtRef.current) {
+        startTimeRef.current += now - pausedAtRef.current;
+      }
+      lastFrameRef.current = now;
+
+      setFruits((currentFruits) => {
+        const activeFruits = currentFruits.filter((fruit) => !fruit.cut);
+        const nextFruits = activeFruits.length > 0 ? currentFruits : [makeNextFruit()];
+        fruitsRef.current = nextFruits;
+        return nextFruits;
+      });
+
+      gameStateRef.current = "playing";
+      setGameState("playing");
+      timerRef.current = window.setInterval(tickGame, 16);
+      tickGame();
+    }, 1000);
+  }, [clearCountdownTimer, makeNextFruit, tickGame]);
+
   const startGame = useCallback(() => {
     getAudioContext();
 
@@ -864,9 +936,10 @@ export function FruitCutterGame() {
       if (timerRef.current) {
         window.clearInterval(timerRef.current);
       }
+      clearCountdownTimer();
       clearPendingTimers();
     },
-    [clearPendingTimers],
+    [clearCountdownTimer, clearPendingTimers],
   );
 
   useEffect(() => {
@@ -879,6 +952,7 @@ export function FruitCutterGame() {
     const updateMobileAppLayout = () => {
       const useMobileLayout = shouldUseMobileAppLayout();
       setIsImmersiveMode(useMobileLayout);
+      const isPortraitGate = window.matchMedia("(orientation: portrait) and (max-width: 960px)").matches;
 
       if (useMobileLayout) {
         const orientation = screen.orientation as ScreenOrientation & {
@@ -886,12 +960,24 @@ export function FruitCutterGame() {
         };
         void orientation.lock?.("landscape").catch(() => undefined);
       }
+
+      if (useMobileLayout && isPortraitGate) {
+        pauseForOrientation();
+      } else {
+        resumeFromOrientationPause();
+      }
     };
 
     updateMobileAppLayout();
     queries.forEach((query) => query.addEventListener("change", updateMobileAppLayout));
-    return () => queries.forEach((query) => query.removeEventListener("change", updateMobileAppLayout));
-  }, []);
+    window.addEventListener("orientationchange", updateMobileAppLayout);
+    window.addEventListener("resize", updateMobileAppLayout);
+    return () => {
+      queries.forEach((query) => query.removeEventListener("change", updateMobileAppLayout));
+      window.removeEventListener("orientationchange", updateMobileAppLayout);
+      window.removeEventListener("resize", updateMobileAppLayout);
+    };
+  }, [pauseForOrientation, resumeFromOrientationPause]);
 
   const isDoubleScoreActive = activeEffects.scoreUntil > effectNow && activeEffects.scoreMultiplier === 2;
   const isFreezeActive =
@@ -977,10 +1063,16 @@ export function FruitCutterGame() {
           </div>
         </header>
 
+        {resumeCountdown !== null && (
+          <div className="resume-countdown" aria-live="assertive">
+            {resumeCountdown}
+          </div>
+        )}
+
         <div
           aria-disabled={gameState !== "playing"}
           aria-label="Drop the knife"
-          className={`factory-scene${gameState === "playing" ? " is-playing" : ""}`}
+          className={`factory-scene${gameState === "playing" || gameState === "paused" ? " is-playing" : ""}`}
           onKeyDown={(event) => {
             if (event.key === "Enter" || event.key === " ") {
               event.preventDefault();

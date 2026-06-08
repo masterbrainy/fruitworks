@@ -149,7 +149,7 @@ button {
 .spark-field span:nth-child(13) { left: 61%; top: 82%; animation-delay: 2.1s; }
 .spark-field span:nth-child(14) { left: 84%; top: 38%; animation-delay: 1s; }
 
-.special-popup {
+  .special-popup {
   width: min(360px, calc(100% - 34px));
   position: absolute;
   z-index: 30;
@@ -847,15 +847,21 @@ button {
 .scrap-kiwi {
   --scrap-main: #8fcf4f;
   --scrap-dark: #5f3d22;
+  width: calc(var(--scrap-size) * 1.26);
+  height: calc(var(--scrap-size) * 1.26);
 }
 
 .scrap-kiwi .scrap-shape {
+  border-radius: 50%;
   background:
-    radial-gradient(circle at 50% 50%, #f7f7cc 0 15%, transparent 16%),
-    radial-gradient(circle at 36% 35%, #2b231f 0 3%, transparent 4%),
-    radial-gradient(circle at 66% 40%, #2b231f 0 3%, transparent 4%),
-    radial-gradient(circle at 43% 66%, #2b231f 0 3%, transparent 4%),
-    linear-gradient(145deg, #a3d65e 0 70%, #7a4b28 71% 100%);
+    radial-gradient(circle at 50% 50%, #f7f7cc 0 18%, transparent 19%),
+    radial-gradient(circle at 34% 34%, #2b231f 0 3%, transparent 4%),
+    radial-gradient(circle at 66% 36%, #2b231f 0 3%, transparent 4%),
+    radial-gradient(circle at 34% 66%, #2b231f 0 3%, transparent 4%),
+    radial-gradient(circle at 66% 66%, #2b231f 0 3%, transparent 4%),
+    radial-gradient(circle at 50% 28%, #2b231f 0 2.5%, transparent 3.5%),
+    radial-gradient(circle at 50% 72%, #2b231f 0 2.5%, transparent 3.5%),
+    linear-gradient(145deg, #a8db56 0 82%, #6e9f34 83% 100%);
 }
 
 .scrap-avocado {
@@ -1787,6 +1793,18 @@ button {
   }
 }
 
+@keyframes countdown-flash {
+  0%,
+  100% {
+    opacity: 0.62;
+    transform: translate(-50%, -50%) scale(0.92);
+  }
+  45% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+}
+
 @media (max-width: 720px) {
   .app-shell {
     padding: 10px;
@@ -2004,7 +2022,7 @@ button {
     font-size: 0.92rem;
   }
 
-  .special-popup {
+.special-popup {
     top: 48px;
     padding: 7px 10px;
     font-size: 0.82rem;
@@ -2117,6 +2135,26 @@ button {
     padding: 9px 16px;
     font-size: 1rem;
   }
+}
+
+.resume-countdown {
+  min-width: 72px;
+  min-height: 72px;
+  position: absolute;
+  z-index: 20;
+  left: 50%;
+  top: 50%;
+  display: grid;
+  place-items: center;
+  border: 4px solid #1f2937;
+  border-radius: 50%;
+  color: #15202f;
+  background: rgba(255, 250, 240, 0.92);
+  font-size: clamp(2.4rem, 9vw, 4.6rem);
+  font-weight: 1000;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 10px 0 rgba(31, 41, 55, 0.14);
+  animation: countdown-flash 1s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
