@@ -313,8 +313,8 @@ button {
 
 .game-frame.is-immersive .knife-rig,
 .game-frame:fullscreen .knife-rig {
-  --knife-impact-y: clamp(76px, 22.5vh, 90px);
-  --knife-bury-y: clamp(84px, 24.5vh, 98px);
+  --knife-impact-y: clamp(126px, 36vh, 146px);
+  --knife-bury-y: clamp(134px, 38vh, 154px);
   width: 44px;
   height: 90px;
   top: clamp(-16px, -4vh, -8px);
