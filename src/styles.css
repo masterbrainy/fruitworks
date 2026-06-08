@@ -861,6 +861,8 @@ button {
 .scrap-avocado {
   --scrap-main: #92c94c;
   --scrap-dark: #2f6d35;
+  width: calc(var(--scrap-size) * 1.24);
+  height: calc(var(--scrap-size) * 0.98);
 }
 
 .scrap-avocado .scrap-shape {
@@ -874,6 +876,8 @@ button {
 .scrap-dragonfruit {
   --scrap-main: #f8fafc;
   --scrap-dark: #d946ef;
+  width: calc(var(--scrap-size) * 1.28);
+  height: calc(var(--scrap-size) * 1.02);
 }
 
 .scrap-dragonfruit .scrap-shape {
@@ -1145,7 +1149,10 @@ button {
 }
 
 .fruit-kiwi .fruit-shape {
+  width: calc(var(--fruit-size) * 0.72);
+  height: calc(var(--fruit-size) * 0.9);
   border-color: rgba(77, 48, 27, 0.9);
+  border-radius: 54% 46% 56% 44%;
   background:
     radial-gradient(circle at 28% 22%, rgba(255, 255, 255, 0.26) 0 10%, transparent 11%),
     radial-gradient(circle at 24% 40%, rgba(87, 54, 31, 0.48) 0 5%, transparent 6%),
@@ -1158,6 +1165,9 @@ button {
 }
 
 .fruit-kiwi.is-cut .fruit-half {
+  width: calc(var(--fruit-size) * 0.72);
+  height: calc(var(--fruit-size) * 0.9);
+  border-radius: 54% 46% 56% 44%;
   background:
     radial-gradient(circle at 50% 50%, #f8f7c8 0 16%, transparent 17%),
     radial-gradient(circle at 35% 34%, #1f2937 0 3%, transparent 4%),
