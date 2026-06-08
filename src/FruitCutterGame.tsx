@@ -375,6 +375,7 @@ export function FruitCutterGame() {
   const pendingTimerRefs = useRef<number[]>([]);
   const countdownTimerRef = useRef<number | null>(null);
   const orientationPausedRef = useRef(false);
+  const pausedFruitsRef = useRef<Fruit[]>([]);
   const pausedAtRef = useRef(0);
 
   const [gameState, setGameState] = useState<GameState>("idle");
@@ -417,6 +418,10 @@ export function FruitCutterGame() {
 
     const updateMetrics = () => {
       const nextBeltSize = { width: belt.clientWidth, height: belt.clientHeight };
+      if (nextBeltSize.width < 80 || nextBeltSize.height < 40) {
+        return;
+      }
+
       beltSizeRef.current = nextBeltSize;
       setBeltSize(nextBeltSize);
 
@@ -700,6 +705,7 @@ export function FruitCutterGame() {
     clearPendingTimers();
     clearCountdownTimer();
     orientationPausedRef.current = true;
+    pausedFruitsRef.current = fruitsRef.current.map((fruit) => ({ ...fruit }));
     pausedAtRef.current = performance.now();
     knifeDroppingRef.current = false;
     knifeMissRef.current = false;
@@ -712,6 +718,12 @@ export function FruitCutterGame() {
   const resumeFromOrientationPause = useCallback(() => {
     if (!orientationPausedRef.current || gameStateRef.current !== "paused" || countdownTimerRef.current) {
       return;
+    }
+
+    const pausedFruits = pausedFruitsRef.current.map((fruit) => ({ ...fruit }));
+    if (pausedFruits.length > 0) {
+      fruitsRef.current = pausedFruits;
+      setFruits(pausedFruits);
     }
 
     let nextCount = 3;
@@ -735,16 +747,25 @@ export function FruitCutterGame() {
       lastFrameRef.current = now;
 
       setFruits((currentFruits) => {
-        const activeFruits = currentFruits.filter((fruit) => !fruit.cut);
-        const nextFruits = activeFruits.length > 0 ? currentFruits : [makeNextFruit()];
+        const currentActiveFruits = currentFruits.filter((fruit) => !fruit.cut);
+        const pausedActiveFruits = pausedFruitsRef.current.filter((fruit) => !fruit.cut);
+        const nextFruits =
+          currentActiveFruits.length > 0
+            ? currentFruits
+            : pausedActiveFruits.length > 0
+              ? pausedFruitsRef.current.map((fruit) => ({ ...fruit }))
+              : [makeNextFruit()];
         fruitsRef.current = nextFruits;
+        pausedFruitsRef.current = [];
         return nextFruits;
       });
 
       gameStateRef.current = "playing";
       setGameState("playing");
+      if (timerRef.current) {
+        window.clearInterval(timerRef.current);
+      }
       timerRef.current = window.setInterval(tickGame, 16);
-      tickGame();
     }, 1000);
   }, [clearCountdownTimer, makeNextFruit, tickGame]);
 
