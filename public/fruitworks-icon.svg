@@ -5,5 +5,4 @@
   <path d="M82 324h348" stroke="#9ca3af" stroke-width="14" stroke-dasharray="30 26"/>
   <circle cx="256" cy="234" r="22" fill="#ef4444" stroke="#1f2937" stroke-width="12"/>
   <path d="M216 46h80l-40 126z" fill="#f8fafc" stroke="#1f2937" stroke-width="16" stroke-linejoin="round"/>
-  <path d="M256 60v94" stroke="#e5edf5" stroke-width="10" stroke-linecap="round"/>
 </svg>
