@@ -222,7 +222,7 @@ button {
   border-radius: 0;
   gap: 3px;
   padding:
-    max(3px, env(safe-area-inset-top))
+    max(9px, calc(env(safe-area-inset-top) + 5px))
     max(4px, env(safe-area-inset-right))
     max(3px, env(safe-area-inset-bottom))
     max(4px, env(safe-area-inset-left));
@@ -1950,7 +1950,7 @@ button {
     max-height: calc(100vh - 6px);
     max-height: calc(100dvh - 6px);
     gap: 3px;
-    padding: 4px 5px;
+    padding: max(9px, calc(env(safe-area-inset-top) + 5px)) 5px 4px;
   }
 
   .scorebar {
