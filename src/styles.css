@@ -506,7 +506,7 @@ button {
 }
 
 .knife-rig.is-dropping {
-  animation: knife-drop 980ms linear both;
+  animation: knife-drop 560ms linear both;
 }
 
 .knife-rig.is-hidden {
@@ -1398,18 +1398,6 @@ button {
 @keyframes knife-drop {
   0% {
     transform: translateX(-50%) translateY(0);
-  }
-  18% {
-    transform: translateX(-50%) translateY(calc(var(--knife-impact-y) * 0.07));
-  }
-  42% {
-    transform: translateX(-50%) translateY(calc(var(--knife-impact-y) * 0.28));
-  }
-  66% {
-    transform: translateX(-50%) translateY(calc(var(--knife-impact-y) * 0.62));
-  }
-  84% {
-    transform: translateX(-50%) translateY(calc(var(--knife-impact-y) * 0.88));
   }
   100% {
     transform: translateX(-50%) translateY(var(--knife-impact-y));
