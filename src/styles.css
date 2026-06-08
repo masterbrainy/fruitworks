@@ -294,47 +294,47 @@ button {
 
 .game-frame.is-immersive .knife-rig,
 .game-frame:fullscreen .knife-rig {
-  --knife-impact-y: clamp(80px, 24vh, 96px);
-  --knife-bury-y: clamp(88px, 26vh, 104px);
-  width: 42px;
-  height: 118px;
-  top: clamp(-42px, -10vh, -24px);
+  --knife-impact-y: clamp(66px, 20vh, 80px);
+  --knife-bury-y: clamp(74px, 22vh, 88px);
+  width: 44px;
+  height: 90px;
+  top: clamp(-16px, -4vh, -8px);
 }
 
 .game-frame.is-immersive .knife-handle,
 .game-frame:fullscreen .knife-handle {
-  width: 22px;
-  height: 46px;
+  width: 18px;
+  height: 32px;
   border-width: 3px;
 }
 
 .game-frame.is-immersive .knife-blade,
 .game-frame:fullscreen .knife-blade {
-  width: 34px;
-  height: 68px;
+  width: 40px;
+  height: 54px;
   border-width: 3px;
   border-top-width: 2px;
 }
 
 .game-frame.is-immersive .knife-rig.knife-wide,
 .game-frame:fullscreen .knife-rig.knife-wide {
-  width: 58px;
+  width: 70px;
 }
 
 .game-frame.is-immersive .knife-rig.knife-wide .knife-blade,
 .game-frame:fullscreen .knife-rig.knife-wide .knife-blade {
-  width: 50px;
-  height: 72px;
+  width: 66px;
+  height: 56px;
 }
 
 .game-frame.is-immersive .knife-rig.knife-skinny,
 .game-frame:fullscreen .knife-rig.knife-skinny {
-  width: 28px;
+  width: 24px;
 }
 
 .game-frame.is-immersive .knife-rig.knife-skinny .knife-blade,
 .game-frame:fullscreen .knife-rig.knife-skinny .knife-blade {
-  width: 18px;
+  width: 20px;
 }
 
 .game-frame.is-immersive .machine-top,
@@ -1790,41 +1790,41 @@ button {
   }
 
   .knife-rig {
-    --knife-impact-y: clamp(80px, 24vh, 96px);
-    --knife-bury-y: clamp(88px, 26vh, 104px);
-    width: 42px;
-    height: 118px;
-    top: clamp(-42px, -10vh, -24px);
+    --knife-impact-y: clamp(66px, 20vh, 80px);
+    --knife-bury-y: clamp(74px, 22vh, 88px);
+    width: 44px;
+    height: 90px;
+    top: clamp(-16px, -4vh, -8px);
   }
 
   .knife-handle {
-    width: 22px;
-    height: 46px;
+    width: 18px;
+    height: 32px;
     border-width: 3px;
   }
 
   .knife-blade {
-    width: 34px;
-    height: 68px;
+    width: 40px;
+    height: 54px;
     border-width: 3px;
     border-top-width: 2px;
   }
 
   .knife-rig.knife-wide {
-    width: 58px;
+    width: 70px;
   }
 
   .knife-rig.knife-wide .knife-blade {
-    width: 50px;
-    height: 72px;
+    width: 66px;
+    height: 56px;
   }
 
   .knife-rig.knife-skinny {
-    width: 28px;
+    width: 24px;
   }
 
   .knife-rig.knife-skinny .knife-blade {
-    width: 18px;
+    width: 20px;
   }
 
   .machine-top {
