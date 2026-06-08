@@ -152,32 +152,6 @@ button {
   font-size: 1rem;
 }
 
-.fullscreen-action {
-  min-height: 38px;
-  position: absolute;
-  z-index: 42;
-  top: max(10px, env(safe-area-inset-top));
-  right: max(10px, env(safe-area-inset-right));
-  display: none;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 7px 10px;
-  border: 3px solid #1f2937;
-  border-radius: 8px;
-  color: #111827;
-  background: rgba(255, 250, 240, 0.94);
-  font-size: 0.82rem;
-  font-weight: 950;
-  box-shadow: 0 6px 0 rgba(31, 41, 55, 0.14);
-  cursor: pointer;
-}
-
-.fullscreen-action:active {
-  transform: translateY(2px);
-  box-shadow: 0 4px 0 rgba(31, 41, 55, 0.14);
-}
-
 .effect-status-panel {
   position: absolute;
   z-index: 26;
@@ -1638,26 +1612,6 @@ button {
 
   .primary-action {
     width: min(100%, 360px);
-  }
-}
-
-@media (pointer: coarse), (max-width: 960px) {
-  .fullscreen-action {
-    display: inline-flex;
-  }
-
-  .scorebar {
-    padding-right: 82px;
-  }
-}
-
-@media (pointer: coarse), (max-width: 960px), (max-height: 560px) {
-  .fullscreen-action {
-    min-height: 30px;
-    gap: 5px;
-    padding: 4px 7px;
-    border-width: 2px;
-    font-size: 0.68rem;
   }
 }
 

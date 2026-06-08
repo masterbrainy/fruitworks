@@ -1,4 +1,4 @@
-const CACHE_NAME = "fruitworks-v4";
+const CACHE_NAME = "fruitworks-v5";
 const BASE_URL = new URL(self.registration.scope).pathname;
 const PRECACHE_URLS = [
   `${BASE_URL}manifest.webmanifest`,

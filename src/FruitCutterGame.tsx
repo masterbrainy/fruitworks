@@ -1,4 +1,4 @@
-import { Maximize2, Minimize2, Play, RotateCcw } from "lucide-react";
+import { Play, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 const HIGH_SCORE_KEY = "fruitCutterHighScore";
@@ -199,6 +199,20 @@ const loadHighScore = () => {
 
 const formatRemaining = (until: number, now: number) => `${Math.max(0, Math.ceil((until - now) / 1000))}s`;
 
+const shouldUseMobileAppLayout = () => {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  return (
+    window.matchMedia("(max-width: 960px)").matches ||
+    window.matchMedia("(pointer: coarse)").matches ||
+    window.matchMedia("(display-mode: fullscreen)").matches ||
+    window.matchMedia("(display-mode: standalone)").matches ||
+    ("standalone" in window.navigator && Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone))
+  );
+};
+
 function StarfruitSvg() {
   return (
     <svg className="starfruit-svg" viewBox="0 0 100 100" aria-hidden="true" focusable="false">
@@ -311,7 +325,6 @@ function GameOverModal({
 }
 
 export function FruitCutterGame() {
-  const gameFrameRef = useRef<HTMLElement | null>(null);
   const factorySceneRef = useRef<HTMLDivElement | null>(null);
   const beltRef = useRef<HTMLDivElement | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
@@ -340,7 +353,7 @@ export function FruitCutterGame() {
   const [effectPopup, setEffectPopup] = useState<EffectPopup | null>(null);
   const [beltSize, setBeltSize] = useState({ width: 900, height: 190 });
   const [knifeState, setKnifeState] = useState<KnifeState>("ready");
-  const [isImmersiveMode, setIsImmersiveMode] = useState(false);
+  const [isImmersiveMode, setIsImmersiveMode] = useState(shouldUseMobileAppLayout);
   const [knifeLineX, setKnifeLineX] = useState<number | null>(null);
 
   useEffect(() => {
@@ -808,30 +821,6 @@ export function FruitCutterGame() {
     }, KNIFE_IMPACT_MS);
   }, [cutFruit, endGame, getAudioContext, playFailureSound, playSliceSound, setPendingTimer]);
 
-  const toggleImmersiveMode = useCallback(async () => {
-    const frame = gameFrameRef.current;
-    const shouldEnter = !isImmersiveMode;
-
-    if (shouldEnter) {
-      setIsImmersiveMode(true);
-      try {
-        await frame?.requestFullscreen?.({ navigationUI: "hide" });
-        const orientation = screen.orientation as ScreenOrientation & {
-          lock?: (orientation: OrientationLockType) => Promise<void>;
-        };
-        await orientation.lock?.("landscape").catch(() => undefined);
-      } catch {
-        setIsImmersiveMode(true);
-      }
-      return;
-    }
-
-    if (document.fullscreenElement) {
-      await document.exitFullscreen().catch(() => undefined);
-    }
-    setIsImmersiveMode(false);
-  }, [isImmersiveMode]);
-
   useEffect(
     () => () => {
       if (timerRef.current) {
@@ -843,29 +832,27 @@ export function FruitCutterGame() {
   );
 
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsImmersiveMode(Boolean(document.fullscreenElement));
+    const queries = [
+      window.matchMedia("(max-width: 960px)"),
+      window.matchMedia("(pointer: coarse)"),
+      window.matchMedia("(display-mode: fullscreen)"),
+      window.matchMedia("(display-mode: standalone)"),
+    ];
+    const updateMobileAppLayout = () => {
+      const useMobileLayout = shouldUseMobileAppLayout();
+      setIsImmersiveMode(useMobileLayout);
+
+      if (useMobileLayout) {
+        const orientation = screen.orientation as ScreenOrientation & {
+          lock?: (orientation: OrientationLockType) => Promise<void>;
+        };
+        void orientation.lock?.("landscape").catch(() => undefined);
+      }
     };
 
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
-  }, []);
-
-  useEffect(() => {
-    const isInstalledApp =
-      window.matchMedia("(display-mode: fullscreen)").matches ||
-      window.matchMedia("(display-mode: standalone)").matches ||
-      ("standalone" in window.navigator && Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone));
-
-    if (!isInstalledApp) {
-      return;
-    }
-
-    setIsImmersiveMode(true);
-    const orientation = screen.orientation as ScreenOrientation & {
-      lock?: (orientation: OrientationLockType) => Promise<void>;
-    };
-    void orientation.lock?.("landscape").catch(() => undefined);
+    updateMobileAppLayout();
+    queries.forEach((query) => query.addEventListener("change", updateMobileAppLayout));
+    return () => queries.forEach((query) => query.removeEventListener("change", updateMobileAppLayout));
   }, []);
 
   const isDoubleScoreActive = activeEffects.scoreUntil > effectNow && activeEffects.scoreMultiplier === 2;
@@ -893,19 +880,8 @@ export function FruitCutterGame() {
         className={`game-frame${isFreezeActive ? " is-frozen" : ""}${isDoubleScoreActive ? " has-double-score" : ""}${
           isImmersiveMode ? " is-immersive" : ""
         }`}
-        ref={gameFrameRef}
         aria-label="Conveyor Fruit Cutter Game"
       >
-        <button
-          aria-pressed={isImmersiveMode}
-          className="fullscreen-action"
-          onClick={toggleImmersiveMode}
-          type="button"
-        >
-          {isImmersiveMode ? <Minimize2 size={18} aria-hidden="true" /> : <Maximize2 size={18} aria-hidden="true" />}
-          <span>{isImmersiveMode ? "Exit" : "Fullscreen"}</span>
-        </button>
-
         {isDoubleScoreActive && (
           <div className="spark-field" aria-hidden="true">
             {Array.from({ length: 14 }, (_, index) => (
