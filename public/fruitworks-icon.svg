@@ -3,10 +3,7 @@
   <rect x="54" y="84" width="404" height="344" rx="42" fill="#fff7d6" stroke="#1f2937" stroke-width="24"/>
   <path d="M82 298h348v74H82z" fill="#4b5563" stroke="#1f2937" stroke-width="18"/>
   <path d="M82 324h348" stroke="#9ca3af" stroke-width="14" stroke-dasharray="30 26"/>
-  <path d="M258 108c29 0 54 14 70 36 16 21 21 49 13 75-9 28-30 49-58 58-27 8-57 3-78-15-21-17-33-43-31-70 3-47 38-84 84-84z" fill="#ef4444" stroke="#1f2937" stroke-width="18"/>
-  <path d="M260 118c18-22 43-33 73-33" fill="none" stroke="#2f855a" stroke-width="18" stroke-linecap="round"/>
-  <path d="M253 153c-12 23-11 59 3 85" fill="none" stroke="#fff7d6" stroke-width="16" stroke-linecap="round" opacity=".78"/>
-  <path d="M256 24v138" stroke="#1f2937" stroke-width="22" stroke-linecap="round"/>
-  <path d="M222 42h68v158h-68z" fill="#f8fafc" stroke="#1f2937" stroke-width="16"/>
-  <path d="M241 192l15 48 15-48z" fill="#cbd5e1" stroke="#1f2937" stroke-width="14" stroke-linejoin="round"/>
+  <circle cx="256" cy="234" r="22" fill="#ef4444" stroke="#1f2937" stroke-width="12"/>
+  <path d="M216 46h80l-40 126z" fill="#f8fafc" stroke="#1f2937" stroke-width="16" stroke-linejoin="round"/>
+  <path d="M256 60v94" stroke="#e5edf5" stroke-width="10" stroke-linecap="round"/>
 </svg>
