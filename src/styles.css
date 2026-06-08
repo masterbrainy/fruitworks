@@ -287,7 +287,7 @@ button {
 
 .game-frame.is-immersive .effect-status-panel,
 .game-frame:fullscreen .effect-status-panel {
-  right: 8px;
+  right: max(12px, calc(env(safe-area-inset-right) + 8px));
   bottom: 6px;
   gap: 3px;
 }
@@ -315,12 +315,12 @@ button {
 
 .game-frame.is-immersive .special-popup,
 .game-frame:fullscreen .special-popup {
-  width: min(280px, 38vw);
+  width: min(280px, 44vw);
   top: 50px;
-  right: 8px;
+  right: max(12px, calc(env(safe-area-inset-right) + 8px));
   padding: 7px 9px;
   font-size: 0.78rem;
-  text-align: right;
+  text-align: center;
 }
 
 .game-frame.is-immersive .special-popup span,
@@ -2044,7 +2044,7 @@ button {
   }
 
   .effect-status-panel {
-    right: 8px;
+    right: max(12px, calc(env(safe-area-inset-right) + 8px));
     bottom: 6px;
     gap: 3px;
   }
@@ -2067,12 +2067,12 @@ button {
   }
 
   .special-popup {
-    width: min(280px, 38vw);
+    width: min(280px, 44vw);
     top: 50px;
-    right: 8px;
+    right: max(12px, calc(env(safe-area-inset-right) + 8px));
     padding: 7px 9px;
     font-size: 0.78rem;
-    text-align: right;
+    text-align: center;
   }
 
   .special-popup span {
