@@ -21,7 +21,10 @@ type FruitType =
   | "grapes"
   | "banana"
   | "watermelon"
-  | "rambutan"
+  | "kiwi"
+  | "avocado"
+  | "dragonfruit"
+  | "pineapple"
   | "lemon"
   | "lime"
   | "sugarcane"
@@ -97,7 +100,10 @@ const fruitTypes: FruitType[] = [
   "grapes",
   "banana",
   "watermelon",
-  "rambutan",
+  "kiwi",
+  "avocado",
+  "dragonfruit",
+  "pineapple",
   "lemon",
   "lime",
   "sugarcane",
@@ -112,7 +118,10 @@ const fruitSettings: Record<
   grapes: { minSize: 34, maxSize: 44, hitScale: 0.44, speedBias: -6 },
   banana: { minSize: 108, maxSize: 124, hitScale: 0.88, speedBias: -8 },
   watermelon: { minSize: 84, maxSize: 98, hitScale: 0.82, speedBias: -2 },
-  rambutan: { minSize: 58, maxSize: 70, hitScale: 0.62, speedBias: 4 },
+  kiwi: { minSize: 58, maxSize: 70, hitScale: 0.62, speedBias: 4 },
+  avocado: { minSize: 68, maxSize: 80, hitScale: 0.7, speedBias: 1 },
+  dragonfruit: { minSize: 72, maxSize: 86, hitScale: 0.72, speedBias: 2 },
+  pineapple: { minSize: 76, maxSize: 90, hitScale: 0.68, speedBias: 3, visualWidthScale: 0.78, baseAnchorScale: 0.74 },
   lemon: { minSize: 58, maxSize: 72, hitScale: 0.66, speedBias: 2 },
   lime: { minSize: 52, maxSize: 64, hitScale: 0.58, speedBias: 5 },
   sugarcane: { minSize: 92, maxSize: 110, hitScale: 0.78, speedBias: 3, visualWidthScale: 0.27, baseAnchorScale: 0.92 },

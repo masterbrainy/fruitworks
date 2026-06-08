@@ -819,11 +819,6 @@ button {
   --scrap-dark: #15803d;
 }
 
-.scrap-rambutan {
-  --scrap-main: #f43f5e;
-  --scrap-dark: #be123c;
-}
-
 .scrap-lemon {
   --scrap-main: #fde047;
   --scrap-dark: #eab308;
@@ -846,6 +841,59 @@ button {
   background:
     linear-gradient(180deg, rgba(58, 88, 38, 0.42) 0 7%, transparent 8% 45%, rgba(58, 88, 38, 0.42) 46% 53%, transparent 54%),
     linear-gradient(90deg, rgba(255, 255, 255, 0.28), transparent 34%),
+    linear-gradient(145deg, var(--scrap-main), var(--scrap-dark));
+}
+
+.scrap-kiwi {
+  --scrap-main: #8fcf4f;
+  --scrap-dark: #5f3d22;
+}
+
+.scrap-kiwi .scrap-shape {
+  background:
+    radial-gradient(circle at 50% 50%, #f7f7cc 0 15%, transparent 16%),
+    radial-gradient(circle at 36% 35%, #2b231f 0 3%, transparent 4%),
+    radial-gradient(circle at 66% 40%, #2b231f 0 3%, transparent 4%),
+    radial-gradient(circle at 43% 66%, #2b231f 0 3%, transparent 4%),
+    linear-gradient(145deg, #a3d65e 0 70%, #7a4b28 71% 100%);
+}
+
+.scrap-avocado {
+  --scrap-main: #92c94c;
+  --scrap-dark: #2f6d35;
+}
+
+.scrap-avocado .scrap-shape {
+  border-radius: 56% 44% 62% 38%;
+  background:
+    radial-gradient(circle at 54% 55%, #9a6032 0 18%, transparent 19%),
+    radial-gradient(circle at 50% 52%, #efe6a1 0 34%, transparent 35%),
+    linear-gradient(145deg, #96c74f 0 66%, #2f6d35 67% 100%);
+}
+
+.scrap-dragonfruit {
+  --scrap-main: #f8fafc;
+  --scrap-dark: #d946ef;
+}
+
+.scrap-dragonfruit .scrap-shape {
+  background:
+    radial-gradient(circle at 38% 36%, #111827 0 3%, transparent 4%),
+    radial-gradient(circle at 62% 43%, #111827 0 3%, transparent 4%),
+    radial-gradient(circle at 50% 64%, #111827 0 3%, transparent 4%),
+    linear-gradient(145deg, #f8fafc 0 66%, #ec4899 67% 100%);
+}
+
+.scrap-pineapple {
+  --scrap-main: #facc15;
+  --scrap-dark: #b7791f;
+}
+
+.scrap-pineapple .scrap-shape {
+  border-radius: 18px;
+  background:
+    linear-gradient(45deg, transparent 0 43%, rgba(146, 64, 14, 0.38) 44% 50%, transparent 51%),
+    linear-gradient(-45deg, transparent 0 43%, rgba(146, 64, 14, 0.34) 44% 50%, transparent 51%),
     linear-gradient(145deg, var(--scrap-main), var(--scrap-dark));
 }
 
@@ -1072,22 +1120,6 @@ button {
   --shape-tilt: 7deg;
 }
 
-.fruit-rambutan .fruit-shape {
-  background:
-    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.74) 0 10%, transparent 11%),
-    radial-gradient(circle at 66% 70%, rgba(0, 0, 0, 0.16) 0 22%, transparent 23%),
-    #e83e5a;
-  box-shadow:
-    0 -10px 0 -5px #ffbf3d,
-    10px -7px 0 -5px #ffbf3d,
-    12px 4px 0 -5px #ffbf3d,
-    6px 13px 0 -5px #ffbf3d,
-    -7px 12px 0 -5px #ffbf3d,
-    -13px 2px 0 -5px #ffbf3d,
-    -9px -9px 0 -5px #ffbf3d,
-    inset -10px -12px 0 rgba(0, 0, 0, 0.18);
-}
-
 .fruit-durian .fruit-shape {
   width: calc(var(--fruit-size) * 0.86);
   height: calc(var(--fruit-size) * 0.78);
@@ -1106,8 +1138,142 @@ button {
 .fruit-durian {
   --shape-tilt: -8deg;
   filter:
-    drop-shadow(0 0 7px rgba(80, 67, 29, 0.36))
+    drop-shadow(0 0 8px rgba(119, 164, 47, 0.72))
+    drop-shadow(0 0 18px rgba(74, 111, 32, 0.62))
+    drop-shadow(0 0 28px rgba(92, 64, 32, 0.34))
     drop-shadow(0 16px 0 rgba(31, 41, 55, 0.18));
+}
+
+.fruit-kiwi .fruit-shape {
+  border-color: rgba(77, 48, 27, 0.9);
+  background:
+    radial-gradient(circle at 28% 22%, rgba(255, 255, 255, 0.26) 0 10%, transparent 11%),
+    radial-gradient(circle at 24% 40%, rgba(87, 54, 31, 0.48) 0 5%, transparent 6%),
+    radial-gradient(circle at 58% 28%, rgba(87, 54, 31, 0.42) 0 4%, transparent 5%),
+    radial-gradient(circle at 68% 66%, rgba(87, 54, 31, 0.5) 0 5%, transparent 6%),
+    linear-gradient(145deg, #8b5a35 0%, #6d4328 58%, #4d2f1e 100%);
+  box-shadow:
+    inset -8px -10px 0 rgba(48, 31, 21, 0.28),
+    inset 5px 7px 0 rgba(255, 255, 255, 0.12);
+}
+
+.fruit-kiwi.is-cut .fruit-half {
+  background:
+    radial-gradient(circle at 50% 50%, #f8f7c8 0 16%, transparent 17%),
+    radial-gradient(circle at 35% 34%, #1f2937 0 3%, transparent 4%),
+    radial-gradient(circle at 65% 36%, #1f2937 0 3%, transparent 4%),
+    radial-gradient(circle at 36% 64%, #1f2937 0 3%, transparent 4%),
+    radial-gradient(circle at 64% 66%, #1f2937 0 3%, transparent 4%),
+    linear-gradient(145deg, #a6d94f 0 76%, #6f4528 77% 100%);
+}
+
+.fruit-kiwi .cut-face {
+  background: linear-gradient(90deg, rgba(248, 247, 200, 0.96), rgba(144, 201, 72, 0.9));
+}
+
+.fruit-avocado {
+  --shape-tilt: -11deg;
+}
+
+.fruit-avocado .fruit-shape {
+  width: calc(var(--fruit-size) * 0.76);
+  height: calc(var(--fruit-size) * 0.9);
+  border-color: rgba(30, 75, 38, 0.9);
+  border-radius: 56% 44% 64% 36%;
+  background:
+    radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.42) 0 12%, transparent 13%),
+    linear-gradient(145deg, #6fb33f 0%, #427f3c 58%, #24542d 100%);
+}
+
+.fruit-avocado.is-cut .fruit-half {
+  width: calc(var(--fruit-size) * 0.76);
+  height: calc(var(--fruit-size) * 0.9);
+  border-color: #27572e;
+  border-radius: 56% 44% 64% 36%;
+  background:
+    radial-gradient(circle at 50% 54%, #f1e6a1 0 38%, transparent 39%),
+    linear-gradient(145deg, #8bcf54 0 68%, #2d6b35 69% 100%);
+}
+
+.fruit-avocado.is-cut .fruit-half-left::after {
+  content: "";
+  width: 32%;
+  height: 32%;
+  position: absolute;
+  left: 40%;
+  top: 42%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 28%, #c88745 0 24%, #8a542c 25% 100%);
+  box-shadow: inset -4px -5px 0 rgba(66, 37, 18, 0.26);
+}
+
+.fruit-avocado .cut-face {
+  height: calc(var(--fruit-size) * 0.72);
+  background: linear-gradient(90deg, rgba(242, 232, 163, 0.95), rgba(126, 194, 80, 0.82));
+}
+
+.fruit-dragonfruit .fruit-shape {
+  border-color: rgba(118, 35, 95, 0.9);
+  border-radius: 60% 40% 58% 42%;
+  background:
+    radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.76) 0 12%, transparent 13%),
+    linear-gradient(135deg, transparent 0 35%, rgba(53, 139, 73, 0.85) 36% 43%, transparent 44%),
+    linear-gradient(35deg, transparent 0 58%, rgba(81, 168, 83, 0.82) 59% 67%, transparent 68%),
+    linear-gradient(145deg, #f472b6 0%, #d946ef 64%, #a21caf 100%);
+  box-shadow:
+    -8px -6px 0 -4px #58a95d,
+    9px 2px 0 -5px #58a95d,
+    -6px 12px 0 -5px #58a95d,
+    inset -8px -10px 0 rgba(87, 26, 83, 0.2),
+    inset 7px 7px 0 rgba(255, 255, 255, 0.18);
+}
+
+.fruit-dragonfruit.is-cut .fruit-half {
+  background:
+    radial-gradient(circle at 34% 34%, #111827 0 3%, transparent 4%),
+    radial-gradient(circle at 58% 28%, #111827 0 3%, transparent 4%),
+    radial-gradient(circle at 44% 58%, #111827 0 3%, transparent 4%),
+    radial-gradient(circle at 68% 64%, #111827 0 3%, transparent 4%),
+    linear-gradient(145deg, #f8fafc 0 74%, #e879f9 75% 100%);
+}
+
+.fruit-pineapple {
+  width: calc(var(--fruit-size) * 0.78);
+  height: calc(var(--fruit-size) * 1.16);
+  transform: translateY(calc(var(--fruit-size) * -0.12));
+}
+
+.fruit-pineapple .fruit-shape {
+  width: calc(var(--fruit-size) * 0.66);
+  height: calc(var(--fruit-size) * 0.88);
+  border-color: rgba(116, 65, 18, 0.9);
+  border-radius: 24px 24px 38px 38px;
+  background:
+    linear-gradient(45deg, transparent 0 43%, rgba(146, 64, 14, 0.42) 44% 50%, transparent 51%),
+    linear-gradient(-45deg, transparent 0 43%, rgba(146, 64, 14, 0.34) 44% 50%, transparent 51%),
+    radial-gradient(circle at 34% 25%, rgba(255, 255, 255, 0.62) 0 9%, transparent 10%),
+    linear-gradient(145deg, #facc15 0%, #e0a820 55%, #b7791f 100%);
+}
+
+.fruit-pineapple .fruit-shape::before {
+  content: "";
+  width: 70%;
+  height: 34%;
+  position: absolute;
+  left: 15%;
+  top: -27%;
+  clip-path: polygon(50% 0, 62% 48%, 95% 18%, 73% 65%, 100% 72%, 62% 82%, 50% 100%, 38% 82%, 0 72%, 27% 65%, 5% 18%, 38% 48%);
+  background: linear-gradient(180deg, #5ca849, #2f7a3a);
+}
+
+.fruit-pineapple.is-cut .fruit-shape::before,
+.fruit-pineapple.is-cut .fruit-shape::after {
+  display: none;
+}
+
+.fruit-pineapple .cut-face {
+  height: calc(var(--fruit-size) * 0.7);
+  background: linear-gradient(90deg, rgba(255, 245, 157, 0.96), rgba(234, 179, 8, 0.85));
 }
 
 .fruit-sugarcane {
