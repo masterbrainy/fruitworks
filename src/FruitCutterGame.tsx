@@ -2,7 +2,7 @@ import { Play, RotateCcw } from "lucide-react";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 const HIGH_SCORE_KEY = "fruitCutterHighScore";
-const KNIFE_IMPACT_MS = 560;
+const KNIFE_IMPACT_MS = 420;
 const KNIFE_RESPAWN_MS = 260;
 const KNIFE_COLLISION_WIDTH: Record<KnifeMode, number> = {
   normal: 40,

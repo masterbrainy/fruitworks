@@ -294,8 +294,8 @@ button {
 
 .game-frame.is-immersive .knife-rig,
 .game-frame:fullscreen .knife-rig {
-  --knife-impact-y: clamp(66px, 20vh, 80px);
-  --knife-bury-y: clamp(74px, 22vh, 88px);
+  --knife-impact-y: clamp(76px, 22.5vh, 90px);
+  --knife-bury-y: clamp(84px, 24.5vh, 98px);
   width: 44px;
   height: 90px;
   top: clamp(-16px, -4vh, -8px);
@@ -531,7 +531,7 @@ button {
 }
 
 .knife-rig.is-dropping {
-  animation: knife-drop 560ms linear both;
+  animation: knife-drop 420ms linear both;
 }
 
 .knife-rig.is-hidden {
@@ -1790,8 +1790,8 @@ button {
   }
 
   .knife-rig {
-    --knife-impact-y: clamp(66px, 20vh, 80px);
-    --knife-bury-y: clamp(74px, 22vh, 88px);
+    --knife-impact-y: clamp(76px, 22.5vh, 90px);
+    --knife-bury-y: clamp(84px, 24.5vh, 98px);
     width: 44px;
     height: 90px;
     top: clamp(-16px, -4vh, -8px);
