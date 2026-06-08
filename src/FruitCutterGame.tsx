@@ -653,11 +653,13 @@ export function FruitCutterGame() {
           }
 
           let nextX = fruit.x + fruit.speed * deltaSeconds;
+          const settings = fruitSettings[fruit.type];
+          const visualWidth = fruit.size * (settings.visualWidthScale ?? 1);
           if (
             currentEffects.freezeTargetFruitId === fruit.id &&
-            nextX + fruit.size / 2 >= freezeTargetX
+            nextX + visualWidth / 2 >= freezeTargetX
           ) {
-            nextX = freezeTargetX - fruit.size / 2;
+            nextX = freezeTargetX - visualWidth / 2;
             activatedFreezeEffects = {
               ...currentEffects,
               frozenFruitId: fruit.id,

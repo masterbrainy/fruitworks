@@ -149,12 +149,12 @@ button {
 .spark-field span:nth-child(13) { left: 61%; top: 82%; animation-delay: 2.1s; }
 .spark-field span:nth-child(14) { left: 84%; top: 38%; animation-delay: 1s; }
 
-  .special-popup {
+.special-popup {
   width: min(360px, calc(100% - 34px));
   position: absolute;
   z-index: 30;
-  top: 108px;
-  left: 50%;
+  top: 86px;
+  right: clamp(14px, 2.5vw, 28px);
   display: grid;
   gap: 2px;
   padding: 12px 16px;
@@ -164,7 +164,6 @@ button {
   color: #15803d;
   font-weight: 900;
   text-align: center;
-  transform: translateX(-50%);
   box-shadow: 0 10px 22px rgba(31, 41, 55, 0.2);
   animation: special-popup-fade 2.6s ease-out forwards;
 }
@@ -284,6 +283,49 @@ button {
 .game-frame.is-immersive .score-pill strong,
 .game-frame:fullscreen .score-pill strong {
   font-size: clamp(0.88rem, 3vh, 1.15rem);
+}
+
+.game-frame.is-immersive .effect-status-panel,
+.game-frame:fullscreen .effect-status-panel {
+  right: 8px;
+  bottom: 6px;
+  gap: 3px;
+}
+
+.game-frame.is-immersive .effect-badge,
+.game-frame:fullscreen .effect-badge {
+  min-width: 78px;
+  gap: 3px;
+  padding: 2px 4px;
+  border-width: 2px;
+  box-shadow: 0 4px 0 rgba(31, 41, 55, 0.08);
+}
+
+.game-frame.is-immersive .effect-badge span,
+.game-frame:fullscreen .effect-badge span {
+  font-size: 0.5rem;
+  line-height: 1;
+}
+
+.game-frame.is-immersive .effect-badge strong,
+.game-frame:fullscreen .effect-badge strong {
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.game-frame.is-immersive .special-popup,
+.game-frame:fullscreen .special-popup {
+  width: min(280px, 38vw);
+  top: 50px;
+  right: 8px;
+  padding: 7px 9px;
+  font-size: 0.78rem;
+  text-align: right;
+}
+
+.game-frame.is-immersive .special-popup span,
+.game-frame:fullscreen .special-popup span {
+  font-size: 0.72rem;
 }
 
 .game-frame.is-immersive .factory-scene,
@@ -1644,16 +1686,16 @@ button {
 @keyframes special-popup-fade {
   0% {
     opacity: 0;
-    transform: translate(-50%, 8px) scale(0.98);
+    transform: translateY(8px) scale(0.98);
   }
   12%,
   72% {
     opacity: 1;
-    transform: translate(-50%, 0) scale(1);
+    transform: translateY(0) scale(1);
   }
   100% {
     opacity: 0;
-    transform: translate(-50%, -10px) scale(0.98);
+    transform: translateY(-10px) scale(0.98);
   }
 }
 
@@ -2002,34 +2044,39 @@ button {
   }
 
   .effect-status-panel {
-    right: 10px;
-    bottom: 8px;
-    gap: 4px;
+    right: 8px;
+    bottom: 6px;
+    gap: 3px;
   }
 
   .effect-badge {
-    min-width: 92px;
-    gap: 5px;
-    padding: 3px 5px;
+    min-width: 78px;
+    gap: 3px;
+    padding: 2px 4px;
     border-width: 2px;
   }
 
   .effect-badge span {
-    font-size: 0.66rem;
+    font-size: 0.5rem;
+    line-height: 1;
   }
 
   .effect-badge strong {
-    font-size: 0.92rem;
+    font-size: 0.72rem;
+    line-height: 1;
   }
 
-.special-popup {
-    top: 48px;
-    padding: 7px 10px;
-    font-size: 0.82rem;
+  .special-popup {
+    width: min(280px, 38vw);
+    top: 50px;
+    right: 8px;
+    padding: 7px 9px;
+    font-size: 0.78rem;
+    text-align: right;
   }
 
   .special-popup span {
-    font-size: 0.8rem;
+    font-size: 0.72rem;
   }
 
   .factory-scene {
