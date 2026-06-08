@@ -65,6 +65,61 @@ button {
   box-shadow: 0 24px 48px rgba(42, 54, 74, 0.22);
 }
 
+.rotate-phone-screen {
+  display: none;
+}
+
+.rotate-phone-mark {
+  width: 86px;
+  height: 86px;
+  position: relative;
+  display: grid;
+  place-items: center;
+  border: 4px solid #1f2937;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255, 223, 88, 0.58), transparent 58%),
+    #fffaf0;
+  box-shadow: 0 14px 0 rgba(31, 41, 55, 0.12);
+}
+
+.rotate-phone-mark::before {
+  content: "";
+  width: 32px;
+  height: 54px;
+  display: block;
+  border: 4px solid #1f2937;
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, #eb4d44 0 34%, #fff7d6 35% 100%);
+  transform: rotate(-18deg);
+  box-shadow: inset 0 -6px 0 rgba(31, 41, 55, 0.12);
+}
+
+.rotate-phone-mark::after {
+  content: "";
+  width: 28px;
+  height: 28px;
+  position: absolute;
+  right: -5px;
+  bottom: 10px;
+  border-right: 4px solid #1f2937;
+  border-bottom: 4px solid #1f2937;
+  border-radius: 0 0 18px;
+  transform: rotate(-20deg);
+}
+
+.rotate-phone-mark span {
+  width: 10px;
+  height: 10px;
+  position: absolute;
+  right: -10px;
+  bottom: 3px;
+  border-top: 4px solid #1f2937;
+  border-right: 4px solid #1f2937;
+  transform: rotate(35deg);
+}
+
 .spark-field {
   position: absolute;
   inset: 0;
@@ -1605,143 +1660,63 @@ button {
 
 @media (orientation: portrait) and (max-width: 960px) {
   .app-shell {
-    width: 100dvh;
-    height: 100dvw;
     position: fixed;
-    top: 0;
-    left: 0;
-    padding: 3px;
-    transform: rotate(90deg) translateY(-100%);
-    transform-origin: top left;
-  }
-
-  .game-frame {
-    width: calc(100dvh - 6px);
-    height: calc(100dvw - 6px);
-    max-height: calc(100dvw - 6px);
-  }
-
-  .game-frame .scorebar {
-    align-items: center;
-    flex-direction: row;
-  }
-
-  .game-frame {
-    gap: 3px;
-    padding: 4px 5px;
-  }
-
-  .brand-block {
-    gap: 5px;
-  }
-
-  .brand-mark {
-    width: 24px;
-    height: 24px;
-    border-width: 2px;
-    font-size: 0.78rem;
-  }
-
-  .brand-block p,
-  .mini-label {
-    margin: 0;
-    font-size: 0.46rem;
-    line-height: 1;
-  }
-
-  .brand-block h1 {
-    max-width: none;
-    font-size: clamp(0.72rem, 2.2vw, 0.95rem);
-    line-height: 1;
-  }
-
-  .score-cluster {
-    display: flex;
-    flex-wrap: nowrap;
-    gap: 4px;
-  }
-
-  .score-pill {
-    min-width: 50px;
-    padding: 2px 5px;
-    border-width: 2px;
-  }
-
-  .score-pill span {
-    font-size: 0.48rem;
-  }
-
-  .score-pill strong {
-    font-size: clamp(0.88rem, 3vh, 1.15rem);
-  }
-
-  .factory-scene {
-    min-height: 0;
-    padding-top: 0;
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+    place-items: stretch;
+    padding: 0;
+    overflow: hidden;
     transform: none;
+    background:
+      radial-gradient(circle at 50% 30%, rgba(255, 223, 88, 0.34), transparent 34%),
+      linear-gradient(160deg, #fff7e0 0%, #e8f7ff 100%);
   }
 
-  .knife-rig {
-    --knife-impact-y: clamp(80px, 24vh, 96px);
-    --knife-bury-y: clamp(88px, 26vh, 104px);
-    width: 42px;
-    height: 118px;
-    top: clamp(-42px, -10vh, -24px);
+  .game-frame {
+    display: none;
   }
 
-  .knife-handle {
-    width: 22px;
-    height: 46px;
-    border-width: 3px;
+  .rotate-phone-screen {
+    width: 100%;
+    height: 100%;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 14px;
+    padding:
+      max(24px, env(safe-area-inset-top))
+      max(22px, env(safe-area-inset-right))
+      max(24px, env(safe-area-inset-bottom))
+      max(22px, env(safe-area-inset-left));
+    border: 0;
+    color: #15202f;
+    text-align: center;
   }
 
-  .knife-blade {
-    width: 34px;
-    height: 68px;
-    border-width: 3px;
-    border-top-width: 2px;
+  .rotate-phone-screen p {
+    margin: 8px 0 0;
+    color: #34735b;
+    font-size: 0.82rem;
+    font-weight: 950;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
-  .machine-top {
-    width: min(56%, 420px);
-    height: 24px;
-    margin-bottom: -3px;
-    padding: 4px 10px;
-    border-width: 3px;
+  .rotate-phone-screen h2 {
+    margin: 0;
+    max-width: 11ch;
+    font-size: clamp(2.1rem, 11vw, 3.35rem);
+    line-height: 0.95;
+    letter-spacing: 0;
   }
+}
 
-  .machine-top span {
-    height: 6px;
-  }
-
-  .belt-wrap {
-    grid-template-columns: 18px minmax(0, 1fr) 18px;
-    min-height: clamp(74px, 25vh, 96px);
-  }
-
-  .fruit-layer {
-    left: 18px;
-    right: 18px;
-  }
-
-  .conveyor-belt {
-    height: clamp(74px, 25vh, 96px);
-    border-width: 4px;
-    border-bottom-width: 8px;
-  }
-
-  .belt-end {
-    border-width: 4px;
-    box-shadow: 0 10px 0 #26313f;
-  }
-
-  .cut-scrap-layer {
-    top: calc(100% - 8px);
-    height: 42px;
-  }
-
-  .table-legs span {
-    height: clamp(10px, 3.5vh, 20px);
+@media (orientation: landscape), (min-width: 961px) {
+  .rotate-phone-screen {
+    display: none;
   }
 }
 

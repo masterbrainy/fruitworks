@@ -876,6 +876,14 @@ export function FruitCutterGame() {
 
   return (
     <main className={`app-shell${isImmersiveMode ? " is-immersive" : ""}`}>
+      <aside className="rotate-phone-screen" aria-live="polite">
+        <div className="rotate-phone-mark" aria-hidden="true">
+          <span />
+        </div>
+        <p>Fruitworks</p>
+        <h2>Rotate your phone</h2>
+      </aside>
+
       <section
         className={`game-frame${isFreezeActive ? " is-frozen" : ""}${isDoubleScoreActive ? " has-double-score" : ""}${
           isImmersiveMode ? " is-immersive" : ""
