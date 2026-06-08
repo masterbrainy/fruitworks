@@ -115,7 +115,7 @@ const fruitSettings: Record<
   rambutan: { minSize: 58, maxSize: 70, hitScale: 0.62, speedBias: 4 },
   lemon: { minSize: 58, maxSize: 72, hitScale: 0.66, speedBias: 2 },
   lime: { minSize: 52, maxSize: 64, hitScale: 0.58, speedBias: 5 },
-  sugarcane: { minSize: 92, maxSize: 110, hitScale: 0.78, speedBias: 3, visualWidthScale: 0.54, baseAnchorScale: 0.92 },
+  sugarcane: { minSize: 92, maxSize: 110, hitScale: 0.78, speedBias: 3, visualWidthScale: 0.27, baseAnchorScale: 0.92 },
   durian: { minSize: 70, maxSize: 82, hitScale: 0.7, speedBias: 1 },
   starfruit: { minSize: 72, maxSize: 84, hitScale: 0.78, speedBias: -2 },
 };

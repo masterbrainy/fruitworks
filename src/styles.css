@@ -391,8 +391,8 @@ button {
 
 .game-frame.is-immersive .cut-scrap-layer,
 .game-frame:fullscreen .cut-scrap-layer {
-  top: calc(100% - 8px);
-  height: 42px;
+  top: calc(100% + 8px);
+  height: 58px;
 }
 
 .game-frame.is-immersive .table-legs span,
@@ -1111,15 +1111,15 @@ button {
 }
 
 .fruit-sugarcane {
-  width: calc(var(--fruit-size) * 0.54);
+  width: calc(var(--fruit-size) * 0.27);
   height: calc(var(--fruit-size) * 1.38);
   transform: translateY(calc(var(--fruit-size) * -0.28));
 }
 
 .fruit-sugarcane .fruit-shape {
-  width: calc(var(--fruit-size) * 0.46);
+  width: calc(var(--fruit-size) * 0.23);
   height: calc(var(--fruit-size) * 1.22);
-  border-radius: 16px;
+  border-radius: 12px;
   border-color: rgba(70, 95, 44, 0.9);
   background:
     linear-gradient(180deg, rgba(77, 106, 45, 0.55) 0 5%, transparent 6% 28%, rgba(77, 106, 45, 0.52) 29% 35%, transparent 36% 61%, rgba(77, 106, 45, 0.52) 62% 68%, transparent 69%),
@@ -1134,8 +1134,8 @@ button {
 .fruit-sugarcane .fruit-shape::after {
   content: "";
   position: absolute;
-  left: -4px;
-  right: -4px;
+  left: -2px;
+  right: -2px;
   height: 5px;
   border-radius: 999px;
   background: rgba(62, 84, 39, 0.72);
@@ -1916,8 +1916,8 @@ button {
   }
 
   .cut-scrap-layer {
-    top: calc(100% - 8px);
-    height: 42px;
+    top: calc(100% + 8px);
+    height: 58px;
   }
 
   .table-legs {
