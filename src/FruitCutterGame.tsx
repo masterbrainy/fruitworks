@@ -878,7 +878,7 @@ export function FruitCutterGame() {
     <main className={`app-shell${isImmersiveMode ? " is-immersive" : ""}`}>
       <aside className="rotate-phone-screen" aria-live="polite">
         <div className="rotate-phone-mark" aria-hidden="true">
-          <span />
+          <img src={`${import.meta.env.BASE_URL}fruitworks-icon.svg`} alt="" />
         </div>
         <p>Fruitworks</p>
         <h2>Rotate your phone</h2>
@@ -919,11 +919,11 @@ export function FruitCutterGame() {
         <header className="scorebar">
           <div className="brand-block">
             <span className="brand-mark" aria-hidden="true">
-              ✦
+              <img src={`${import.meta.env.BASE_URL}fruitworks-icon.svg`} alt="" />
             </span>
             <div>
-              <p>Fruitworks</p>
-              <h1>Conveyor Fruit Cutter</h1>
+              <h1>Fruitworks</h1>
+              <p>Created by Patchworks</p>
             </div>
           </div>
 

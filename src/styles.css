@@ -70,54 +70,24 @@ button {
 }
 
 .rotate-phone-mark {
-  width: 86px;
-  height: 86px;
+  width: 98px;
+  height: 98px;
   position: relative;
   display: grid;
   place-items: center;
-  border: 4px solid #1f2937;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 50% 50%, rgba(255, 223, 88, 0.58), transparent 58%),
+    radial-gradient(circle at 50% 50%, rgba(255, 223, 88, 0.5), transparent 68%),
     #fffaf0;
   box-shadow: 0 14px 0 rgba(31, 41, 55, 0.12);
 }
 
-.rotate-phone-mark::before {
-  content: "";
-  width: 32px;
-  height: 54px;
+.rotate-phone-mark img {
+  width: 76px;
+  height: 76px;
   display: block;
-  border: 4px solid #1f2937;
-  border-radius: 8px;
-  background:
-    linear-gradient(180deg, #eb4d44 0 34%, #fff7d6 35% 100%);
-  transform: rotate(-18deg);
-  box-shadow: inset 0 -6px 0 rgba(31, 41, 55, 0.12);
-}
-
-.rotate-phone-mark::after {
-  content: "";
-  width: 28px;
-  height: 28px;
-  position: absolute;
-  right: -5px;
-  bottom: 10px;
-  border-right: 4px solid #1f2937;
-  border-bottom: 4px solid #1f2937;
-  border-radius: 0 0 18px;
-  transform: rotate(-20deg);
-}
-
-.rotate-phone-mark span {
-  width: 10px;
-  height: 10px;
-  position: absolute;
-  right: -10px;
-  bottom: 3px;
-  border-top: 4px solid #1f2937;
-  border-right: 4px solid #1f2937;
-  transform: rotate(35deg);
+  border-radius: 18px;
+  filter: drop-shadow(0 8px 0 rgba(31, 41, 55, 0.16));
 }
 
 .spark-field {
@@ -263,7 +233,6 @@ button {
   align-items: center;
   flex-direction: row;
   gap: 5px;
-  padding-right: 82px;
 }
 
 .game-frame.is-immersive .brand-block,
@@ -273,24 +242,22 @@ button {
 
 .game-frame.is-immersive .brand-mark,
 .game-frame:fullscreen .brand-mark {
-  width: 24px;
-  height: 24px;
-  border-width: 2px;
-  font-size: 0.78rem;
+  width: 32px;
+  height: 32px;
 }
 
 .game-frame.is-immersive .brand-block p,
 .game-frame:fullscreen .brand-block p {
   display: block;
-  margin: 0;
-  font-size: 0.46rem;
+  margin: 1px 0 0;
+  font-size: 0.5rem;
   line-height: 1;
 }
 
 .game-frame.is-immersive .brand-block h1,
 .game-frame:fullscreen .brand-block h1 {
   max-width: none;
-  font-size: clamp(0.72rem, 2.2vw, 0.95rem);
+  font-size: clamp(1rem, 2.6vw, 1.25rem);
   line-height: 1;
 }
 
@@ -434,28 +401,31 @@ button {
   flex: 0 0 auto;
   display: grid;
   place-items: center;
-  border: 4px solid #1f2937;
-  border-radius: 8px;
-  color: #fff5d7;
-  background: #eb4d44;
-  font-size: 2rem;
-  box-shadow: inset 0 -8px 0 rgba(0, 0, 0, 0.16);
+  border-radius: 12px;
+  filter: drop-shadow(0 7px 0 rgba(31, 41, 55, 0.14));
+}
+
+.brand-mark img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: inherit;
 }
 
 .brand-block p,
 .mini-label {
-  margin: 0 0 2px;
-  color: #34735b;
-  font-size: clamp(0.95rem, 2vw, 1.08rem);
+  margin: 2px 0 0;
+  color: #15202f;
+  font-size: clamp(0.85rem, 1.65vw, 1rem);
   font-weight: 900;
   text-transform: uppercase;
 }
 
 .brand-block h1 {
   margin: 0;
-  max-width: 13ch;
-  color: #15202f;
-  font-size: clamp(1.85rem, 4.8vw, 3.65rem);
+  max-width: none;
+  color: #34735b;
+  font-size: clamp(2.05rem, 5vw, 3.85rem);
   line-height: 0.98;
   letter-spacing: 0;
 }
@@ -1745,22 +1715,20 @@ button {
   }
 
   .brand-mark {
-    width: 24px;
-    height: 24px;
-    border-width: 2px;
-    font-size: 0.78rem;
+    width: 32px;
+    height: 32px;
   }
 
   .brand-block p,
   .mini-label {
-    margin: 0;
-    font-size: 0.46rem;
+    margin: 1px 0 0;
+    font-size: 0.5rem;
     line-height: 1;
   }
 
   .brand-block h1 {
     max-width: none;
-    font-size: clamp(0.72rem, 2.2vw, 0.95rem);
+    font-size: clamp(1rem, 2.6vw, 1.25rem);
     line-height: 1;
   }
 
