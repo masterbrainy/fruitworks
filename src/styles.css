@@ -531,7 +531,7 @@ button {
 }
 
 .knife-rig.is-dropping {
-  animation: knife-drop 420ms linear both;
+  animation: knife-drop 300ms linear both;
 }
 
 .knife-rig.is-hidden {
